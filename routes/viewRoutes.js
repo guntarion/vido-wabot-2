@@ -35,8 +35,8 @@ router.get('/datachat', (req, res) => {
     res.render('datachat', { title: 'Data Chat' });
 });
 
-router.get('/pages', (req, res) => {
-    res.render('pages', { title: 'Pages' });
+router.get('/message', (req, res) => {
+    res.render('message', { title: 'Kirim Pesan' });
 });
 
 router.get('/forms', (req, res) => {

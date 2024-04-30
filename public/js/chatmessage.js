@@ -1,16 +1,19 @@
+const getContentButton = document.getElementById('get-content');
+const getMessageButton = document.getElementById('get-message');
+
 // This function fetches chat data from the server and displays messages for a specific chatId
 // eslint-disable-next-line no-unused-vars
 function loadMessages(chatId) {
     // console.log('Loading messages for chat:', chatId);
-    fetch('/api/chats')  // Assuming '/api/chats' is set up to return the chatsData.json content
-        .then(response => response.json())
-        .then(chatsData => {
-            const chat = chatsData.find(c => c.id === chatId);
+    fetch('/api/chats') // Assuming '/api/chats' is set up to return the chatsData.json content
+        .then((response) => response.json())
+        .then((chatsData) => {
+            const chat = chatsData.find((c) => c.id === chatId);
             if (chat) {
                 displayChatMessages(chat);
             }
         })
-        .catch(error => console.error('Failed to load chats data:', error));
+        .catch((error) => console.error('Failed to load chats data:', error));
 }
 
 function displayChatMessages(chat) {
@@ -24,7 +27,7 @@ function displayChatMessages(chat) {
     chatLastOnline.textContent = chat.lastonline;
 
     let messagesHtml = '';
-    chat.messages.forEach(msg => {
+    chat.messages.forEach((msg) => {
         const alignClass = msg.type === 'me' ? ' me' : '';
         messagesHtml += `
             <div class="message${alignClass}">
@@ -36,54 +39,161 @@ function displayChatMessages(chat) {
     chatMessages.innerHTML = messagesHtml;
 }
 
-document.getElementById('get-content').addEventListener('click', function() {
-    const chatMessages = document.getElementById('chat-messages');
-    const chatContent = document.getElementById('chat-content');
-    const lastSender = document.getElementById('last-sender');
+if (getContentButton) {
+    document.getElementById('get-content').addEventListener('click', function () {
+        const chatMessages = document.getElementById('chat-messages');
+        const chatContent = document.getElementById('chat-content');
+        const lastSender = document.getElementById('last-sender');
 
-    // Get the text content and type of all .message elements within #chat-messages
-    const messages = Array.from(chatMessages.querySelectorAll('.message')).map(message => {
-        const content = message.querySelector('.bubble').textContent;
-        const type = message.classList.contains('me') ? 'CS' : 'Clients';
-        return { type, content };
+        // Get the text content and type of all .message elements within #chat-messages
+        const messages = Array.from(chatMessages.querySelectorAll('.message')).map(
+            (message) => {
+                const content = message.querySelector('.bubble').textContent;
+                const type = message.classList.contains('me') ? 'CS' : 'Clients';
+                return { type, content };
+            }
+        );
+
+        // Join the messages into a single string with line breaks between each message
+        const messagesText = messages
+            .map((message) => `${message.type}: ${message.content}`)
+            .join('\n');
+
+        // Insert the messages into #chat-content
+        chatContent.textContent = messagesText;
+
+        // Insert the type of the last message into #last-sender
+        lastSender.textContent = messages[messages.length - 1].type;
     });
+}
 
-    // Join the messages into a single string with line breaks between each message
-    const messagesText = messages.map(message => `${message.type}: ${message.content}`).join('\n');
+if (getMessageButton) {
+    document.getElementById('get-message').addEventListener('click', function () {
+        const chatContent = document.getElementById('chat-content').textContent;
+        const lastSender = document.getElementById('last-sender').textContent;
+        console.log('chatContent:', chatContent);
 
-    // Insert the messages into #chat-content
-    chatContent.textContent = messagesText;
+        // Show the spinner
+        document.querySelector('.css3-spinner').style.display = 'block';
 
-    // Insert the type of the last message into #last-sender
-    lastSender.textContent = messages[messages.length - 1].type;
+        fetch('/api/message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ chatContent, lastSender }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                // Hide the spinner
+                document.querySelector('.css3-spinner').style.display = 'none';
+
+                document.getElementById('openai-output').value = data.message;
+            })
+            .catch((error) => {
+                // Hide the spinner in case of error
+                document.querySelector('.css3-spinner').style.display = 'none';
+
+                console.error('Error:', error);
+            });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const updateSelectedList = () => {
+        const selectedList = document.getElementById('selectedPersonsList');
+        selectedList.innerHTML = ''; // Clear the list
+        const checkboxes = document.querySelectorAll('.select-checkbox:checked');
+        checkboxes.forEach((checkbox, index) => {
+            const name = checkbox.getAttribute('data-name');
+            const listItem = document.createElement('li');
+            listItem.textContent = `${index + 1}. ${name}`; // Create list item with the name
+            selectedList.appendChild(listItem); // Add the list item to the list
+        });
+    };
+
+    // Event listener for checkboxes
+    const checkboxes = document.querySelectorAll('.select-checkbox');
+    if (checkboxes) {
+        checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', updateSelectedList);
+        });
+    }
+
+    // Sending messages when button is clicked
+    const sendMessagesBtn = document.getElementById('sendMessagesBtn');
+    if (sendMessagesBtn) {
+        sendMessagesBtn.addEventListener('click', function () {
+            const selectedUsers = [];
+            document.querySelectorAll('.select-checkbox:checked').forEach((checkbox) => {
+                selectedUsers.push({
+                    name: checkbox.getAttribute('data-name'),
+                    number: checkbox.getAttribute('data-number'),
+                });
+            });
+
+            // Get the content of the message from the textarea
+            const messageContent = document.getElementById('konten-dikirim').value;
+
+            // Log selected users or send this data to your server/API for further processing
+            console.log('%c Selected users', 'color: green', selectedUsers);
+
+            // Example: Post to a server endpoint
+            const numbers = selectedUsers.map(user => user.number);
+            fetch('http://localhost:3002/api/send-messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    numbers: numbers,
+                    text: messageContent,
+                }),
+            })
+                .then((response) => response.json())
+                .then((data) => console.log(data))
+                .catch((error) => console.error('Error:', error));
+        });
+    }
 });
 
-document.getElementById('get-message').addEventListener('click', function() {
-    const chatContent = document.getElementById('chat-content').textContent;
-    const lastSender = document.getElementById('last-sender').textContent;
-    console.log('chatContent:', chatContent);
+/*
+document.getElementById('improve-pesan').addEventListener('click', function () {
+    // Replace these with the actual number and text message
+    const number = '+62817309143';
+    const text = 'hallo this is WA Bot on 31 April';
 
-    // Show the spinner
-    document.querySelector('.css3-spinner').style.display = 'block';
-
-    fetch('/api/message', {
+    fetch('http://localhost:3002/api/send-message', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ chatContent, lastSender }),
+        body: JSON.stringify({ number: number, text: text }),
     })
-        .then(response => response.json())
-        .then(data => {
-            // Hide the spinner
-            document.querySelector('.css3-spinner').style.display = 'none';
-
-            document.getElementById('openai-output').value = data.message;
-        })
-        .catch(error => {
-            // Hide the spinner in case of error
-            document.querySelector('.css3-spinner').style.display = 'none';
-
+        .then((response) => response.json())
+        .then((data) => console.log(data))
+        .catch((error) => {
             console.error('Error:', error);
+            console.error('Error name:', error.name);
+            console.error('Error message:', error.message);
         });
 });
+
+
+document.getElementById('sendMessagesBtn').addEventListener('click', function() {
+    // Replace these with the actual numbers and text message
+    const numbers = ['+62817309143', '+62817309143', '+62811334932'];
+    const text = 'hallo this is WA Bot on 1 Mei';
+
+    fetch('http://localhost:3002/api/send-messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ numbers: numbers, text: text }),
+    })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error:', error));
+});
+*/

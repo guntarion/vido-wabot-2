@@ -6,8 +6,6 @@ const { engine } = require('express-handlebars');
 require('dotenv').config();
 
 
-// const healthRoute = require('./routes/healthRoute');
-// const messageRoutes = require('./routes/messageRoutes');
 const client = require('../whatsapp/waclient');
 const viewRoutes = require('../routes/viewRoutes');
 const apiRoutes = require('../routes/apiRoutes');
@@ -23,8 +21,6 @@ app.use(express.urlencoded({ extended: true }));
 const viewsPath = path.join(__dirname, '../templates/views');
 const partialsPath = path.join(__dirname, '../templates/partials');
 const layoutsPath = path.join(__dirname, '../templates/layouts');
-
-// console.log('viewsPath =====', viewsPath);
 
 app.engine(
     'hbs',
@@ -54,13 +50,19 @@ app.use(express.static(publicDirectoryPath));
 
 
 // Mount routes
-// app.use('/api', messageRoutes);
-// app.use('/api', healthRoute);
 app.use('/api', apiRoutes);  // Includes messageRoutes, healthRoute
 app.use(viewRoutes);  // Routes for serving HTML pages
 
 // Initialize WhatsApp client
-// client.initialize();
+client.initialize();
+
+// Closing correctly using CTRL+C 
+process.on('SIGINT', async () => {
+    console.log('(SIGINT) Shutting down...');
+    await client.destroy();
+    console.log('client destroyed');
+    process.exit(0);
+});
 
 http.createServer(app).listen(port, () => {
     console.info('Server listening on port ' + port);
