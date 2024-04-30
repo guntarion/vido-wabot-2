@@ -1,4 +1,4 @@
-const { Client, NoAuth, LocalAuth } = require('./index');
+const { Client, NoAuth, LocalAuth } = require('../index');
 const qrcode = require('qrcode-terminal');
 
 const wwebVersion = '2.2412.54';
@@ -71,6 +71,7 @@ async function replyWithDelay(chat, msg, replyText) {
     }, delay);
 }
 
+/*
 async function sendMessageWithDelay(chat, msg, messageText) {
     // Simulate typing in the chat
     chat.sendStateTyping();
@@ -81,7 +82,7 @@ async function sendMessageWithDelay(chat, msg, messageText) {
         client.sendMessage(msg.from, messageText);
     }, delay);
 }
-
+*/
 
 client.on('message', async (msg) => {
     console.log('MESSAGE RECEIVED', msg);

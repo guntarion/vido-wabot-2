@@ -1,4 +1,4 @@
-const { Client, Location, Poll, List, Buttons, LocalAuth } = require('./index');
+const { Client, Location, Poll, List, Buttons, LocalAuth } = require('../index');
 
 const client = new Client({
     authStrategy: new LocalAuth(),
