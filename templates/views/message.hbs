@@ -5,26 +5,26 @@
 
 <div class="form-group">
     <label>Menanggapi atas pesan:</label>
-    <textarea name="pesan-ditanggapi" id="pesan-ditanggapi" class="form-control required" cols="30" rows="4"></textarea>
+    <textarea name="previous-message" id="previous-message" class="form-control required" cols="30" rows="4"></textarea>
 </div>
 
 <div class="form-group">
     <label>Rencana Pesan:</label>
-    <textarea name="rencana-pesan" id="rencana-pesan" class="form-control required" cols="30" rows="4"></textarea>
+    <textarea name="user-draft" id="user-draft" class="form-control required" cols="30" rows="4"></textarea>
 </div>
 <br>
 
 <div class="col-12 form-group">
     <div class="input-group">
-        <input type="text" name="arahan-ai" id="arahan-ai" class="form-control" value="" placeholder="Arahan improvement">
+        <input type="text" name="user-instruction" id="user-instruction" class="form-control" value="" placeholder="Arahan improvement">
         <div class="input-group-append" style="margin-left: 10px;">
             <button id="reset-instruction" type="button" name="openai-submit" class="btn btn-secondary">Reset</button>
         </div>
     </div>
 </div>
 <div class="form-check">
-    <input type="checkbox" class="form-check-input" id="penggunaan-emoji">
-    <label class="form-check-label" for="penggunaan-emoji">Gunakan emoji</label>
+    <input type="checkbox" class="form-check-input" id="use-emoji">
+    <label class="form-check-label" for="use-emoji">Gunakan emoji</label>
 </div>
 
 <div class="col-12">
@@ -47,7 +47,6 @@
 	<ul id="selectedPersonsList"></ul> <!-- Placeholder for the list of selected persons -->
 	<button id="sendMessagesBtn" type="button" name="kirimkan-pesan" class="btn btn-success">Kirim Pesan</button>
 </div>
-
 
 <br>
 

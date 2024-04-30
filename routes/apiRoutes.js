@@ -35,7 +35,8 @@ router.get('/chats', (req, res) => {
     });
 });
 
-router.post('/message', async (req, res) => {
+// OpenAI API route for chats page - rekomendasi respon berdasarkan history chat
+router.post('/openai-response-recommendation', async (req, res) => {
     const { chatContent, lastSender } = req.body;
 
     const completion = await openai.chat.completions.create({
@@ -45,6 +46,36 @@ router.post('/message', async (req, res) => {
                 content: lastSender === 'Clients' 
                     ? 'Anda adalah customer service yang ramah dari Vido Garment, perusahaan yang bergerak di pembuatan seragam. Tugas Anda adalah memberi respon atas pesan terakhir yang disampaikan Client. Perhatikan isi percakapan sebelum-sebelumnya, untuk memahami konteksnya.' + chatContent 
                     : 'Anda adalah customer service yang ramah dari Vido Garment, perusahaan yang bergerak di pembuatan seragam. Tugas Anda adalah melanjutkan pesan yang sudah disampaikan Customer Service. Perhatikan isi percakapan sebelum-sebelumnya, untuk memahami konteksnya.' + chatContent 
+            },
+        ],
+        model: 'gpt-3.5-turbo',
+    });
+
+    res.json({ message: completion.choices[0].message.content });
+});
+
+router.post('/openai-improvement-pesan', async (req, res) => {
+    const { userDraft, previousMessage, userInstruction, useEmoji } = req.body;
+
+    let content = 'Anda adalah customer service yang ramah dari Vido Garment. Lakukan penyempurnaan dari draft pesan yang diberikan user: pahami intensinya terlebih dahulu, lalu perbaiki tata bahasanya dan kembangkan untuk memenuhi intensi yang dimaksud.' + userDraft;
+
+    if (previousMessage) {
+        content += ' Draft pesan user ini merupakan tanggapan dari pesan atau situasi berikut: ' + previousMessage;
+    }
+
+    if (userInstruction) {
+        content += ' User memberikan arahan terkait atas bagaimana bentuk penyempurnaan yg bisa Anda lakukan, yakni berikut ini: ' + userInstruction;
+    }
+
+    if (useEmoji) {
+        content += ' Harap sertakan emoji yang relevan';
+    }
+
+    const completion = await openai.chat.completions.create({
+        messages: [
+            { 
+                role: 'system', 
+                content: content
             },
         ],
         model: 'gpt-3.5-turbo',

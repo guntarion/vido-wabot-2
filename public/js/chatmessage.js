@@ -1,5 +1,5 @@
 const getContentButton = document.getElementById('get-content');
-const getMessageButton = document.getElementById('get-message');
+const getResponseRecommendationButton = document.getElementById('response-recommendation');
 
 // This function fetches chat data from the server and displays messages for a specific chatId
 // eslint-disable-next-line no-unused-vars
@@ -67,38 +67,45 @@ if (getContentButton) {
     });
 }
 
-if (getMessageButton) {
-    document.getElementById('get-message').addEventListener('click', function () {
-        const chatContent = document.getElementById('chat-content').textContent;
-        const lastSender = document.getElementById('last-sender').textContent;
-        console.log('chatContent:', chatContent);
+// On chat page, when the response recommendation button is clicked
+if (getResponseRecommendationButton) {
+    document
+        .getElementById('response-recommendation')
+        .addEventListener('click', function () {
+            const chatContent =
+                document.getElementById('chat-content').textContent;
+            const lastSender =
+                document.getElementById('last-sender').textContent;
+            console.log('chatContent:', chatContent);
 
-        // Show the spinner
-        document.querySelector('.css3-spinner').style.display = 'block';
+            // Show the spinner
+            document.querySelector('.css3-spinner').style.display = 'block';
 
-        fetch('/api/message', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ chatContent, lastSender }),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                // Hide the spinner
-                document.querySelector('.css3-spinner').style.display = 'none';
-
-                document.getElementById('openai-output').value = data.message;
+            fetch('/api/openai-response-recommendation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ chatContent, lastSender }),
             })
-            .catch((error) => {
-                // Hide the spinner in case of error
-                document.querySelector('.css3-spinner').style.display = 'none';
+                .then((response) => response.json())
+                .then((data) => {
+                    // Hide the spinner
+                    document.querySelector('.css3-spinner').style.display =
+                        'none';
 
-                console.error('Error:', error);
-            });
-    });
+                    document.getElementById('openai-output').value =
+                        data.message;
+                })
+                .catch((error) => {
+                    // Hide the spinner in case of error
+                    document.querySelector('.css3-spinner').style.display ='none';
+                    console.error('Error:', error);
+                });
+        });
 }
 
+// Berlaku untuk page Kirim Pesan
 document.addEventListener('DOMContentLoaded', function () {
     const updateSelectedList = () => {
         const selectedList = document.getElementById('selectedPersonsList');
@@ -158,6 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /*
+// Testing sending a single message
 document.getElementById('improve-pesan').addEventListener('click', function () {
     // Replace these with the actual number and text message
     const number = '+62817309143';
@@ -179,7 +187,7 @@ document.getElementById('improve-pesan').addEventListener('click', function () {
         });
 });
 
-
+// Testing sending multiple messages
 document.getElementById('sendMessagesBtn').addEventListener('click', function() {
     // Replace these with the actual numbers and text message
     const numbers = ['+62817309143', '+62817309143', '+62811334932'];
@@ -197,3 +205,41 @@ document.getElementById('sendMessagesBtn').addEventListener('click', function() 
         .catch(error => console.error('Error:', error));
 });
 */
+
+
+document.getElementById('improve-pesan').addEventListener('click', function () {
+    // Get the values from the inputs
+    const previousMessage = document.getElementById('previous-message').value;
+    const userDraft = document.getElementById('user-draft').value;
+    const userInstruction = document.getElementById('user-instruction').value;
+    const useEmoji = document.getElementById('use-emoji').checked;
+
+    // Show the spinner
+    document.querySelector('.css3-spinner').style.display = 'block';
+
+    // Fetch data from the OpenAI API
+    fetch('/api/openai-improvement-pesan', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            userDraft: userDraft,
+            previousMessage: previousMessage,
+            userInstruction: userInstruction,
+            useEmoji: useEmoji,
+        }),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            // Hide the spinner
+            document.querySelector('.css3-spinner').style.display = 'none';
+            // Put the result in the 'konten-dikirim' textarea
+            document.getElementById('konten-dikirim').value = data.message;
+        })
+        .catch((error) => {
+            // Hide the spinner in case of error
+            document.querySelector('.css3-spinner').style.display ='none';
+            console.error('Error:', error);
+        });
+});
