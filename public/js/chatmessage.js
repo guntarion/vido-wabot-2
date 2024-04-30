@@ -1,4 +1,5 @@
 // This function fetches chat data from the server and displays messages for a specific chatId
+// eslint-disable-next-line no-unused-vars
 function loadMessages(chatId) {
     // console.log('Loading messages for chat:', chatId);
     fetch('/api/chats')  // Assuming '/api/chats' is set up to return the chatsData.json content
@@ -62,6 +63,9 @@ document.getElementById('get-message').addEventListener('click', function() {
     const lastSender = document.getElementById('last-sender').textContent;
     console.log('chatContent:', chatContent);
 
+    // Show the spinner
+    document.querySelector('.css3-spinner').style.display = 'block';
+
     fetch('/api/message', {
         method: 'POST',
         headers: {
@@ -71,6 +75,15 @@ document.getElementById('get-message').addEventListener('click', function() {
     })
         .then(response => response.json())
         .then(data => {
+            // Hide the spinner
+            document.querySelector('.css3-spinner').style.display = 'none';
+
             document.getElementById('openai-output').value = data.message;
+        })
+        .catch(error => {
+            // Hide the spinner in case of error
+            document.querySelector('.css3-spinner').style.display = 'none';
+
+            console.error('Error:', error);
         });
 });

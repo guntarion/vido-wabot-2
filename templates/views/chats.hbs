@@ -76,9 +76,16 @@
    <br>
    <label>Content Recommendation:</label>
 
-   
    <div class="col-12">
       <button id="get-message" type="button" name="openai-submit" class="btn btn-secondary">Get Recommendation</button>
+   </div>
+   <br>
+   <div class="css3-spinner" style="--cnvs-loader-color:var(--cnvs-themecolor); display: none;">
+      <div class="css3-spinner-rect1"></div>
+      <div class="css3-spinner-rect2"></div>
+      <div class="css3-spinner-rect3"></div>
+      <div class="css3-spinner-rect4"></div>
+      <div class="css3-spinner-rect5"></div>
    </div>
    <br>
    <textarea name="openai-output" id="openai-output" class="form-control required" cols="30" rows="5">{{message}}</textarea>

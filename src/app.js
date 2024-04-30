@@ -60,7 +60,7 @@ app.use('/api', apiRoutes);  // Includes messageRoutes, healthRoute
 app.use(viewRoutes);  // Routes for serving HTML pages
 
 // Initialize WhatsApp client
-client.initialize();
+// client.initialize();
 
 http.createServer(app).listen(port, () => {
     console.info('Server listening on port ' + port);
