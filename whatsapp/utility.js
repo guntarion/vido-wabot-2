@@ -2,7 +2,7 @@ async function replyWithDelay(chat, msg, replyText) {
     chat.sendStateTyping();
     setTimeout(() => {
         msg.reply(replyText);
-    }, Math.random() * 2000 + 2000);
+    }, Math.random() * 1000 + 1000);
 }
 
 // this doesn't work because the client is not initialized
@@ -11,7 +11,7 @@ async function sendMessageWithDelay(client, chat, msg, messageText) {
     chat.sendStateTyping();
 
     // Wait for a random time between 2 and 4 seconds
-    const delay = Math.random() * 2000 + 2000;
+    const delay = Math.random() * 1000 + 1000;
     setTimeout(() => {
         if (client && client.sendMessage) {
             client.sendMessage(msg.from, messageText);

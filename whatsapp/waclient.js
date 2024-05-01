@@ -1,6 +1,16 @@
-const { Client, LocalAuth } = require('../index'); // Adjust the path as necessary
+const { Client, LocalAuth, MessageMedia } = require('../index'); // Adjust the path as necessary
 const qrcode = require('qrcode-terminal');
-const handleMessage = require('./handleMessage');
+// const handleMessage = require('./handleMessage');
+const {
+    getUserState,
+    updateUserState,
+    activateConversation,
+    initializeUserState,
+    saveUserResponse,
+    deactivateConversation,
+} = require('./stateManager');
+const { getNextStepMessage, conversationSteps } = require('./conversationFlow');
+const { replyWithDelay, sendMessageWithDelay } = require('./utility');
 
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -28,6 +38,153 @@ client.on('ready', () => {
     console.log('🧤 WhatsApp Client is ready!');
 });
 
-client.on('message', handleMessage);
+// client.on('message', handleMessage);
+
+client.on('message', async (msg) => {
+    console.log('MESSAGE RECEIVED', msg);
+    const chat = await msg.getChat();
+    const sender = await msg.getContact();
+    const userId = sender.number;
+
+    const userState = getUserState(userId);
+
+    if (msg.body === '.status') {
+        const currentDate = new Date();
+        const masehiDateTime = currentDate.toLocaleString('en-US', {
+            timeZone: 'Asia/Jakarta',
+        });
+        const replyMessage = `WA-Bot Vido is up and running 🚀\nMasehi: ${masehiDateTime}`;
+        await replyWithDelay(chat, msg, replyMessage);
+    } else if (msg.body.startsWith('!ping')) {
+        await replyWithDelay(chat, msg, 'pong');
+    } else if (msg.body === '!ping reply') {
+        msg.reply('pong');
+    } else if (msg.body === '.image') {
+        const imageUrl =
+            'https://oaidalleapiprodscus.blob.core.windows.net/private/org-aKlmmRdQt4yIHlGwJZhc5BPz/user-uGcqIKnbaGUzFRj6cMCVKBZT/img-8Dn3yABGpBBrphp1ERefTqe4.png?st=2024-05-01T14%3A00%3A15Z&se=2024-05-01T16%3A00%3A15Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-05-01T04%3A12%3A28Z&ske=2024-05-02T04%3A12%3A28Z&sks=b&skv=2021-08-06&sig=ipo7/u4uH0HdSAKzy0z7AS9z%2B0CXWWdquqoRPsoqlFE%3D';
+
+        try {
+            // Create a MessageMedia object for the image
+            const media = await MessageMedia.fromUrl(imageUrl);
+
+            // Send the image as an attachment
+            client.sendMessage(msg.from, media);
+
+            console.log('Image sent successfully from URL.', msg.id);
+        } catch (error) {
+            console.error('Error sending image from URL:', error);
+        }
+    } 
+    else if (msg.body === '.kaos') {
+        initializeUserState(userId);
+        activateConversation(userId);
+        const initialMessage = getNextStepMessage('askJenisKaos');  // Ensure to use the initial step key
+        await sendMessageWithDelay(client, chat, msg, initialMessage);
+        // Do not update the user state here. It should be updated after the user responds.
+    } else if (userState.active) {
+        if (msg.body.toLowerCase() === 'exit') {
+            client.sendMessage(msg.from, 'Conversation ended.');
+            // await replyWithDelay(chat, msg, 'Conversation ended.');
+            deactivateConversation(userId);
+            initializeUserState(userId);
+        } else {
+            await handleConversationStep(msg, userId, chat);
+        }
+    }
+});
+
+async function handleConversationStep(msg, userId, chat) {
+    const userState = getUserState(userId);
+    const currentStep = conversationSteps[userState.step];
+
+    if (currentStep && msg.body.trim() !== '') {
+        // Save the user's response first
+        saveUserResponse(userId, userState.step, msg.body.trim());
+
+        // Check if there's a next step and move to it
+        if (currentStep.nextStep) {
+            // If there is a next step, move to it and send the corresponding message
+            updateUserState(userId, { step: currentStep.nextStep });
+            const nextStepMessage = getNextStepMessage(currentStep.nextStep);
+            await sendMessageWithDelay(client, chat, msg, nextStepMessage);
+        } else {
+            // If there is no next step, process the final step
+            await processFinalStep(msg, userId, chat);
+        }
+    } else {
+        await replyWithDelay(chat, msg, 'Can you please repeat?');
+    }
+}
+
+
+async function processFinalStep(msg, userId, chat) {
+    const userState = getUserState(userId);
+    const { responses } = userState;
+    const { priceIndividual, priceTotal } = calculatePrices(responses);
+    
+    // console.log('Final responses:', responses);
+    // console.log(`Price per item: ${priceIndividual}, Total price: ${priceTotal}`);
+
+    await sendMessageWithDelay(client,chat,msg,
+        `Harga per pcs @: Rp ${priceIndividual.toLocaleString('id-ID')}, Total Biayanya: Rp ${priceTotal.toLocaleString('id-ID')}`
+    );
+
+    deactivateConversation(userId);
+    initializeUserState(userId); // Reset the state for future interactions
+}
+
+
+function calculatePrices(responses) {
+    let price = 0;
+    const { askJenisKaos, askJenisSablon, askTitikSablon, askQuantityPesan } =
+        responses;
+
+    console.log(`askJenisKaos: ${askJenisKaos}`);
+    console.log(`askJenisSablon: ${askJenisSablon}`);
+    console.log(`askTitikSablon: ${askTitikSablon}`);
+    console.log(`askQuantityPesan: ${askQuantityPesan}`);
+
+    switch (askJenisKaos) {
+    case '1': // Kaos Oblong
+        price += 2000;
+        break;
+    case '2': // Kaos Kerah
+        price += 1500;
+        break;
+    case '3': // Kaos Raglan
+        price += 500;
+        break;
+    }
+
+    console.log(`price 1: ${price}`);
+
+    const titikSablon = parseInt(askTitikSablon, 10);
+    switch (askJenisSablon) {
+    case '1': // Sablon Plastisol
+        price += 4500 * titikSablon;
+        break;
+    case '2': // Sablon Rubber
+        price += 2500 * titikSablon;
+        break;
+    case '3': // Sablon Discharge
+        price += 3000 * titikSablon;
+        break;
+    case '4': // Belum Tahu
+        price += 2500 * titikSablon; // Default case
+        break;
+    }
+
+    console.log(`price 2: ${price}`);
+
+    const quantityPesan = parseInt(askQuantityPesan, 10);
+
+    console.log(`askQuantityPesan: ${askQuantityPesan}`);
+    const priceIndividual = price;
+    const priceTotal = priceIndividual * quantityPesan;
+
+    return { priceIndividual, priceTotal };
+}
+
+
 
 module.exports = client;

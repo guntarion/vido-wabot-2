@@ -1,5 +1,5 @@
 const conversationSteps = {
-    start: {
+    askJenisKaos: {
         message:
             'Jenis kaos apa yang rencana Anda buat?\n(Silahkan merespon dg menulis angka 1 atau 2 atau 3)\n\n1 Kaos Oblong\n2 Kaos Kerah\n3 Kaos Raglan',
         nextStep: 'askJenisSablon',
@@ -15,12 +15,8 @@ const conversationSteps = {
     },
     askQuantityPesan: {
         message: 'Berapa rencana jumlah pcs pembuatannya?',
-        nextStep: 'completion',
-    },
-    completion: {
-        message: 'Terima kasih atas info pemesanannya!',
         nextStep: null, // End of conversation
-    },
+    }
 };
 
 function getNextStepMessage(step) {

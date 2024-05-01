@@ -85,7 +85,26 @@ router.post('/openai-improvement-pesan', async (req, res) => {
 });
 
 
+router.post('/openai-shirt-generation', async (req, res) => {
+    const { prompt } = req.body;
 
+    try {
+        const response = await openai.images.generate({
+            // model: 'dall-e-3',
+            model: 'dall-e-2',
+            prompt: prompt,
+            n: 1,
+            size: '1024x1024',
+        });
+
+        const imageUrl = response.data[0].url;
+
+        res.json({ imageUrl: imageUrl });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while generating the image' });
+    }
+});
 
 router.post('/send-message', sendMessage);
 router.post('/send-messages', sendMessages);

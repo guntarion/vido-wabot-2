@@ -2,7 +2,7 @@ const userStates = {};
 
 function getUserState(userId) {
     if (!userStates[userId]) {
-        userStates[userId] = { step: 'start' };
+        userStates[userId] = { step: 'askJenisKaos' };
     }
     return userStates[userId];
 }
@@ -14,9 +14,9 @@ function updateUserState(userId, newState) {
 // Added 'active' to manage if a user is currently in a conversation.
 function initializeUserState(userId) {
     userStates[userId] = {
-        step: 'start',
+        step: 'askJenisKaos',
         active: false,
-        responses: {}, // Store user responses here
+        responses: {}, // Store user responses here        
     };
 }
 
