@@ -15,7 +15,8 @@ function updateUserState(userId, newState) {
 function initializeUserState(userId) {
     userStates[userId] = {
         step: 'start',
-        active: false
+        active: false,
+        responses: {}, // Store user responses here
     };
 }
 
@@ -25,11 +26,24 @@ function activateConversation(userId) {
     }
 }
 
+function saveUserResponse(userId, step, response) {
+    if (userStates[userId]) {
+        userStates[userId].responses[step] = response;
+    }
+}
+
 function deactivateConversation(userId) {
     if (userStates[userId]) {
         userStates[userId].active = false;
     }
 }
 
-module.exports = { getUserState, updateUserState, initializeUserState, activateConversation, deactivateConversation };
+module.exports = {
+    getUserState,
+    updateUserState,
+    initializeUserState,
+    activateConversation,
+    saveUserResponse, 
+    deactivateConversation,
+};
 

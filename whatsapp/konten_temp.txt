@@ -1,0 +1,87 @@
+
+# PEMESANAN KAOS SINGKAT
+
+Jenis kaos apa yang Anda butuhkan?
+1. Kaos Oblong
+2. Kaos Kerah
+3. Kaos Raglan
+
+Apakah lengan panjang?
+1. Iya
+2. Tidak
+
+Ada berapa jumlah titik sablonannya?
+0 - 6
+
+Berapa jumlahnya?
+
+
+
+
+# PEMESANAN KAOS
+
+Jenis kaos apa yang Anda butuhkan?
+1. Kaos Oblong
+2. Kaos Kerah
+3. Kaos Raglan
+
+Jenis kainnya?
+1. Combed 24s
+2. Combed 30s
+3. Carded 24s
+4. Carded 30s
+5. Lacoste TC
+6. Lacoste 20s
+7. Lacoste 24s
+8. Lacoste 30s
+9. Semi Katun Generik
+10. TC Tebal Generik
+
+Jenis sablonnya?
+1.	Sablon Plastisol 
+2.	Sablon Rubber 
+3.	Sablon CMYK
+4.	Sablon Spotcolor 
+
+Apakah lengan panjang?
+1. Iya
+2. Tidak
+
+Ada berapa jumlah titik sablonannya?
+0 - 6
+
+Apakah ada saku/kantongnya?
+1. Iya
+2. Tidak
+
+Berapa jumlahnya?
+
+
+
+# Testimoni Generator
+
+Apa yang membuat Anda memilih Vido?
+1. Atas rekomendasi teman/relasi
+2. Review yang banyak dan bagus
+3. Lokasi mudah ditemukan
+4. Mendapat masukan bermanfaat
+5. Mendapat rekomendasi bagus
+6. Banyak referensi pilihan
+7. Harganya kompetitif
+8. (alasan lain, harap disebutkan)
+
+Layanan mana yang berkesan atau positif bagi Anda?
+1. Lokasi cukup nyaman
+2. Pilihan desain/bahan/warna beragam
+3. Proses pra produksi efektif & positif
+4. Mendapatkan harga terbaik
+5. Hasil jahitan rapi/kuat
+6. Hasil sablonan/bordiran bagus
+7. Ketepatan waktu delivery
+8. Penanganan komplain baik
+
+Kesan Anda atas Vido Garment
+
+Di antara 1-10, seberapa Anda ingin merekomendasikan Vido ke rekan/orang lain
+
+

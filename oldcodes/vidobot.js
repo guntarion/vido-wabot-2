@@ -71,7 +71,6 @@ async function replyWithDelay(chat, msg, replyText) {
     }, delay);
 }
 
-/*
 async function sendMessageWithDelay(chat, msg, messageText) {
     // Simulate typing in the chat
     chat.sendStateTyping();
@@ -82,7 +81,6 @@ async function sendMessageWithDelay(chat, msg, messageText) {
         client.sendMessage(msg.from, messageText);
     }, delay);
 }
-*/
 
 client.on('message', async (msg) => {
     console.log('MESSAGE RECEIVED', msg);

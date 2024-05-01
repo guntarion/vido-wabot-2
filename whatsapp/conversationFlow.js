@@ -1,18 +1,20 @@
 const conversationSteps = {
     start: {
-        message: 'Jenis kaos apa yang rencana Anda buat?',
-        nextStep: 'askJenisKaos',
-    },
-    askJenisKaos: {
-        message: 'Jenis Sablon apa yang Anda inginkan?',
+        message:
+            'Jenis kaos apa yang rencana Anda buat?\n(Silahkan merespon dg menulis angka 1 atau 2 atau 3)\n\n1 Kaos Oblong\n2 Kaos Kerah\n3 Kaos Raglan',
         nextStep: 'askJenisSablon',
     },
     askJenisSablon: {
-        message: 'Berapa jumlahnya?',
-        nextStep: 'askDeadline',
+        message:
+            'Jenis Sablon apa yang Anda inginkan?\n\n 1.Sablon Plastisol\n2.Sablon Rubber\n3. Sablon Discharge\n4. Belum Tahu',
+        nextStep: 'askTitikSablon',
     },
-    askDeadline: {
-        message: 'Kapan waktu deadline-nya?',
+    askTitikSablon: {
+        message: 'Berapa perkiraan jumlah lokasi/titik sablonnya?',
+        nextStep: 'askQuantityPesan',
+    },
+    askQuantityPesan: {
+        message: 'Berapa rencana jumlah pcs pembuatannya?',
         nextStep: 'completion',
     },
     completion: {
