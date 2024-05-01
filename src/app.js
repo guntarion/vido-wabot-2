@@ -54,15 +54,15 @@ app.use('/api', apiRoutes);  // Includes messageRoutes, healthRoute
 app.use(viewRoutes);  // Routes for serving HTML pages
 
 // Initialize WhatsApp client
-// client.initialize();
+client.initialize();
 
 // Closing correctly using CTRL+C 
-// process.on('SIGINT', async () => {
-//     console.log('(SIGINT) Shutting down...');
-//     await client.destroy();
-//     console.log('client destroyed');
-//     process.exit(0);
-// });
+process.on('SIGINT', async () => {
+    console.log('(SIGINT) Shutting down chat gracefully... 💝');
+    await client.destroy();
+    console.log('client destroyed');
+    process.exit(0);
+});
 
 http.createServer(app).listen(port, () => {
     console.info('Server listening on port ' + port);
