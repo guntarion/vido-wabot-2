@@ -1,24 +1,36 @@
 const userStates = {};
 
 function getUserState(userId) {
+    // Check if user state already exists and return it
     if (!userStates[userId]) {
-        userStates[userId] = { step: 'askJenisKaos' };
+        // If not, initialize with a minimal default state that does not assume any specific conversation
+        userStates[userId] = {
+            step: null,
+            active: false,
+            responses: {},
+            conversationType: null, // Initially, there is no conversation type
+        };
     }
     return userStates[userId];
 }
+
 
 function updateUserState(userId, newState) {
     userStates[userId] = { ...userStates[userId], ...newState };
 }
 
 // Added 'active' to manage if a user is currently in a conversation.
-function initializeUserState(userId) {
+function initializeUserState(userId, conversationType = null) {
     userStates[userId] = {
-        step: 'askJenisKaos',
+        step: conversationType ? Object.keys(conversationType.steps)[0] : null,
         active: false,
-        responses: {}, // Store user responses here        
+        responses: {},
+        conversationType: conversationType, // Store the whole conversation object or null if not provided
     };
+    console.log(`Initialized state for ${userId}: `, userStates[userId]);
 }
+
+
 
 function activateConversation(userId) {
     if (userStates[userId]) {

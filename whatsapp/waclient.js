@@ -9,7 +9,7 @@ const {
     saveUserResponse,
     deactivateConversation,
 } = require('./stateManager');
-const { getNextStepMessage, conversationSteps } = require('./conversationFlow');
+const { getNextStepMessage, conversationPricingKaos, conversationTestimoni, conversationDesainKaos, conversationSizeFitting, } = require('./conversationFlow');
 const { replyWithDelay, sendMessageWithDelay } = require('./utility');
 const { generateImage, generateResponseAsCS } = require('./openaiService');
 
@@ -95,62 +95,92 @@ client.on('message', async (msg) => {
                 );
             });
     } else if (msg.body.toLowerCase() === 'harga kaos') {
-        initializeUserState(userId);
+        initializeUserState(userId, conversationPricingKaos);
         activateConversation(userId);
-        const initialMessage = getNextStepMessage('askJenisKaos'); // Ensure to use the initial step key
+        const initialMessage = getNextStepMessage(conversationPricingKaos, 'askJenisKaos'); // Use the first step from the specific conversation
+        // const initialMessage = getNextStepMessage('askJenisKaos'); // Ensure to use the initial step key
+        // const initialMessage = getNextStepMessage(conversationPricingKaos, userState.step);
         await sendMessageWithDelay(client, chat, msg, initialMessage);
         // Do not update the user state here. It should be updated after the user responds.
+    } else if (msg.body.toLowerCase() === 'feedback') {
+        initializeUserState(userId, conversationTestimoni);
+        activateConversation(userId);
+        const initialMessage = getNextStepMessage(conversationTestimoni, 'askAlasanMemilih');
+        await sendMessageWithDelay(client, chat, msg, initialMessage);
+    } else if (msg.body.toLowerCase() === 'desain kaos') {
+        initializeUserState(userId, conversationDesainKaos);
+        activateConversation(userId);
+        const initialMessage = getNextStepMessage(conversationDesainKaos, 'askJenisKaos');
+        await sendMessageWithDelay(client, chat, msg, initialMessage);
+    } else if (msg.body.toLowerCase() === 'size order') {
+        initializeUserState(userId, conversationSizeFitting);
+        activateConversation(userId);
+        const initialMessage = getNextStepMessage(conversationSizeFitting, 'askOrderPO');
+        await sendMessageWithDelay(client, chat, msg, initialMessage);
     } else if (userState.active) {
         if (msg.body.toLowerCase() === 'exit') {
             client.sendMessage(msg.from, 'Conversation ended.');
-            // await replyWithDelay(chat, msg, 'Conversation ended.');
             deactivateConversation(userId);
             initializeUserState(userId);
         } else {
-            await handleConversationStep(msg, userId, chat);
+            // Pass the userState.conversationType directly to handle steps based on the active conversation
+            await handleConversationStep(msg, userId, chat, userState.conversationType);
         }
     }
 });
 
 async function handleConversationStep(msg, userId, chat) {
     const userState = getUserState(userId);
-    const currentStep = conversationSteps[userState.step];
+    const currentStep = userState.conversationType.steps[userState.step];
 
     if (currentStep && msg.body.trim() !== '') {
-        // Save the user's response first
         saveUserResponse(userId, userState.step, msg.body.trim());
 
-        // Check if there's a next step and move to it
         if (currentStep.nextStep) {
-            // If there is a next step, move to it and send the corresponding message
             updateUserState(userId, { step: currentStep.nextStep });
-            const nextStepMessage = getNextStepMessage(currentStep.nextStep);
+            const nextStepMessage = getNextStepMessage(userState.conversationType, currentStep.nextStep);
             await sendMessageWithDelay(client, chat, msg, nextStepMessage);
         } else {
-            // If there is no next step, process the final step
-            await processFinalStep(msg, userId, chat);
+            await processFinalStep(msg, userId, chat, userState.conversationType.type);
         }
     } else {
-        await replyWithDelay(chat, msg, 'Can you please repeat?');
+        await replyWithDelay(chat, msg, 'Bisa tolong diulangi?');
     }
 }
 
 
-async function processFinalStep(msg, userId, chat) {
+
+
+async function processFinalStep(msg, userId, chat, conversationType) {
     const userState = getUserState(userId);
     const { responses } = userState;
-    const { priceIndividual, priceTotal } = calculatePrices(responses);
-    
-    // console.log('Final responses:', responses);
-    // console.log(`Price per item: ${priceIndividual}, Total price: ${priceTotal}`);
 
-    await sendMessageWithDelay(client,chat,msg,
-        `Harga per pcs @: Rp ${priceIndividual.toLocaleString('id-ID')}, Total Biayanya: Rp ${priceTotal.toLocaleString('id-ID')}`
-    );
+    switch (conversationType) {
+    case 'pricingKaos':
+        // eslint-disable-next-line no-case-declarations
+        const { priceIndividual, priceTotal } = calculatePrices(responses);
+        await sendMessageWithDelay(client, chat, msg, `Harga per pcs @: Rp ${priceIndividual.toLocaleString('id-ID')}, Total Biayanya: Rp ${priceTotal.toLocaleString('id-ID')}`);
+        break;
+    case 'testimoni':
+        await sendMessageWithDelay(client, chat, msg, 'Terima kasih atas testimoni Anda! Kami senang mendengar pengalaman Anda.');
+        break;
+    case 'desainKaos':
+        await sendMessageWithDelay(client, chat, msg, 'Desain Anda telah kami terima dan akan segera diproses.');
+        break;
+    case 'sizeFitting':
+        await sendMessageWithDelay(client, chat, msg, 'Detail ukuran telah dicatat. Terima kasih telah mengonfirmasi ukuran Anda.');
+        break;
+    default:
+        await sendMessageWithDelay(client, chat, msg, 'Kami telah selesai dengan proses ini.');
+        break;
+    }
 
     deactivateConversation(userId);
-    initializeUserState(userId); // Reset the state for future interactions
+    initializeUserState(userId);
 }
+
+
+
 
 
 function calculatePrices(responses) {
