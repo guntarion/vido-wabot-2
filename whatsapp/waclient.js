@@ -11,6 +11,7 @@ const {
 } = require('./stateManager');
 const { getNextStepMessage, conversationSteps } = require('./conversationFlow');
 const { replyWithDelay, sendMessageWithDelay } = require('./utility');
+const { generateImage, generateResponseAsCS } = require('./openaiService');
 
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -59,26 +60,44 @@ client.on('message', async (msg) => {
         await replyWithDelay(chat, msg, 'pong');
     } else if (msg.body === '!ping reply') {
         msg.reply('pong');
-    } else if (msg.body === '.image') {
-        const imageUrl =
-            'https://oaidalleapiprodscus.blob.core.windows.net/private/org-aKlmmRdQt4yIHlGwJZhc5BPz/user-uGcqIKnbaGUzFRj6cMCVKBZT/img-8Dn3yABGpBBrphp1ERefTqe4.png?st=2024-05-01T14%3A00%3A15Z&se=2024-05-01T16%3A00%3A15Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-05-01T04%3A12%3A28Z&ske=2024-05-02T04%3A12%3A28Z&sks=b&skv=2021-08-06&sig=ipo7/u4uH0HdSAKzy0z7AS9z%2B0CXWWdquqoRPsoqlFE%3D';
-
-        try {
-            // Create a MessageMedia object for the image
-            const media = await MessageMedia.fromUrl(imageUrl);
-
-            // Send the image as an attachment
-            client.sendMessage(msg.from, media);
-
-            console.log('Image sent successfully from URL.', msg.id);
-        } catch (error) {
-            console.error('Error sending image from URL:', error);
-        }
     } 
-    else if (msg.body === '.kaos') {
+    else if (msg.body.toLowerCase().startsWith('ask ')) {
+        const prompt = msg.body.slice(4);
+
+        generateResponseAsCS(prompt)
+            .then((response) => {
+                // Send the response text back to the user
+                msg.reply(response);
+            })
+            .catch((error) => {
+                console.error('OpenAI Error:', error);
+                msg.reply(
+                    'Mohon maaf, terjadi error saat memproses request Anda.',
+                    error
+                );
+            });
+    }
+    else if (msg.body.toLowerCase().startsWith('sablon ')) {
+        const prompt = msg.body.slice(7);
+        generateImage(prompt)
+            .then(async (imageUrl) => {
+                console.log('Image URL:', imageUrl);
+                const media = await MessageMedia.fromUrl(imageUrl);
+                console.log('Media:', media);
+
+                // Send the image as an attachment
+                await client.sendMessage(msg.from, media);
+            })
+            .catch((error) => {
+                console.error('OpenAI Error:', error);
+                msg.reply(
+                    'Sorry, I encountered an error while processing your request.'
+                );
+            });
+    } else if (msg.body.toLowerCase() === 'harga kaos') {
         initializeUserState(userId);
         activateConversation(userId);
-        const initialMessage = getNextStepMessage('askJenisKaos');  // Ensure to use the initial step key
+        const initialMessage = getNextStepMessage('askJenisKaos'); // Ensure to use the initial step key
         await sendMessageWithDelay(client, chat, msg, initialMessage);
         // Do not update the user state here. It should be updated after the user responds.
     } else if (userState.active) {
