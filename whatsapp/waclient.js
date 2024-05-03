@@ -11,7 +11,7 @@ const {
 } = require('./stateManager');
 const { getNextStepMessage, conversationPricingKaos, conversationTestimoni, conversationDesainKaos, conversationSizeFitting, } = require('./conversationFlow');
 const { replyWithDelay, sendMessageWithDelay } = require('./utility');
-const { generateImage, generateResponseAsCS } = require('./openaiService');
+const { generateImage, generateResponseAsCS, generateTestimonial } = require('./openaiService');
 
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -149,8 +149,6 @@ async function handleConversationStep(msg, userId, chat) {
 }
 
 
-
-
 async function processFinalStep(msg, userId, chat, conversationType) {
     const userState = getUserState(userId);
     const { responses } = userState;
@@ -162,7 +160,14 @@ async function processFinalStep(msg, userId, chat, conversationType) {
         await sendMessageWithDelay(client, chat, msg, `Harga per pcs @: Rp ${priceIndividual.toLocaleString('id-ID')}, Total Biayanya: Rp ${priceTotal.toLocaleString('id-ID')}`);
         break;
     case 'testimoni':
-        await sendMessageWithDelay(client, chat, msg, 'Terima kasih atas testimoni Anda! Kami senang mendengar pengalaman Anda.');
+        try {
+            const rekomendasiTestimonial = await suggestTestimonial(userState.responses);
+            const message = `Terima kasih atas feedback Anda! Jika Anda berkenan, barangkali Anda bisa memberikan review untuk kami di https://bitly/AGCS32.\n\nBerikut adalah rekomendasi testimonial dari Anda:\n\n${rekomendasiTestimonial}\n\nTerima kasih atas kerjasamanya!`;
+            await sendMessageWithDelay(client, chat, msg, message);
+        } catch (error) {
+            console.error('Error generating testimonial:', error);
+            await sendMessageWithDelay(client, chat, msg, 'Maaf, terjadi kesalahan saat memproses testimonial Anda.');
+        }
         break;
     case 'desainKaos':
         await sendMessageWithDelay(client, chat, msg, 'Desain Anda telah kami terima dan akan segera diproses.');
@@ -180,7 +185,72 @@ async function processFinalStep(msg, userId, chat, conversationType) {
 }
 
 
+// function suggestTestimonial(responses) {
 
+//     const { askAlasanMemilih, askKesanPertama, askKesanTerakhir, askMerekomendasikan } = responses;
+
+//     console.log(`askAlasanMemilih: ${askAlasanMemilih}`);
+//     console.log(`askKesanPertama: ${askKesanPertama}`);
+//     console.log(`askKesanTerakhir: ${askKesanTerakhir}`);
+//     console.log(`askMerekomendasikan: ${askMerekomendasikan}`);
+
+//     return rekomendasiTestimonial;
+// }
+
+
+async function suggestTestimonial(responses) {
+    // Parsing responses for multiple choice answers
+    const parseResponse = (response, options) => {
+        const indices = response.split(/[ ,]+/).map(Number); // Split by comma or space and convert to numbers
+        return indices
+            .map((index) => options[index - 1])
+            .filter(Boolean)
+            .join(', ');
+    };
+
+    // Options corresponding to the numbers for 'askAlasanMemilih'
+    const optionsAlasanMemilih = [
+        'Atas rekomendasi teman/relasi',
+        'Review yang banyak dan bagus',
+        'Lokasi mudah ditemukan',
+        'Mendapat masukan bermanfaat',
+        'Mendapat rekomendasi bagus',
+        'Banyak referensi pilihan',
+        'Harganya kompetitif',
+    ];
+
+    // Options corresponding to the numbers for 'askYangBerkesanApa'
+    const optionsYangBerkesanApa = [
+        'Lokasi cukup nyaman',
+        'Pilihan desain/bahan/warna beragam',
+        'Proses pra produksi efektif & positif',
+        'Mendapatkan harga terbaik',
+        'Hasil jahitan rapi/kuat',
+        'Hasil sablonan/bordiran bagus',
+        'Ketepatan waktu delivery',
+        'Penanganan komplain baik',
+    ];
+
+    const responAlasanMemilih = parseResponse(
+        responses.askAlasanMemilih,
+        optionsAlasanMemilih
+    );
+    const responYangBerkesanApa = parseResponse(
+        responses.askYangBerkesanApa,
+        optionsYangBerkesanApa
+    );
+
+    const responKesanTambahan  = responses.askKesanTambahan;
+
+    console.log(`responAlasanMemilih: ${responAlasanMemilih}`);
+    console.log(`responYangBerkesanApa: ${responYangBerkesanApa}`);
+    console.log(`responKesanTambahan: ${responKesanTambahan}`);
+
+    // Here you can form a complete testimonial string using responses
+    const clueTestimonial = `Alasan memilih Vido: ${responAlasanMemilih}. Perihal yang positif/berkesan: ${responYangBerkesanApa}. Kesan/catatan tambahan: ${responKesanTambahan}`;
+
+    return generateTestimonial(clueTestimonial);
+}
 
 
 function calculatePrices(responses) {

@@ -33,11 +33,11 @@ const conversationTestimoni = {
         askYangBerkesanApa: {
             message:
                 'Layanan mana yang berkesan atau positif bagi Anda?\n1. Lokasi cukup nyaman\n2. Pilihan desain/bahan/warna beragam\n3. Proses pra produksi efektif & positif\n4. Mendapatkan harga terbaik\n5. Hasil jahitan rapi/kuat\n6. Hasil sablonan/bordiran bagus\n7. Ketepatan waktu delivery\n8. Penanganan komplain baik',
-            nextStep: 'askKesan',
+            nextStep: 'askKesanTambahan',
         },
-        askKesan: {
+        askKesanTambahan: {
             message:
-                'Komentar atau kesan Anda atas Vido Garment, atau lainnya yang belum tercakup di atas',
+                'Komentar atau kesan Anda atas Vido Garment, atau lainnya yang belum tercakup di atas; termasuk bila Anda memiliki saran perbaikan?',
             nextStep: 'askMerekomendasikan',
         },
         askMerekomendasikan: {

@@ -48,7 +48,30 @@ async function generateImage(prompt) {
     }
 }
 
+
+async function generateTestimonial(prompt) {
+    try {
+        const response = await openai.chat.completions.create({
+            model: 'gpt-3.5-turbo',
+            messages: [
+                {
+                    role: 'system',
+                    content:
+                        'Berikan testimonial singkat untuk perusahaan Vido Garment, suatu usaha yang bergerak di bidang konfeksi/garment, yang spesialisasi dalam pembuatan baju seragam custom made. Sertakan dalam testimonial alasan mengapa Anda memilih memesan seragam di Vido Garment dan apa yang membuat Anda terkesan selama berinteraksi dengan mereka. Jika ada masukan yang ingin Anda sampaikan, silakan tambahkan dengan penataan bahasa yang konstruktif dan halus. Fokuskan narasi pada aspek positif yang menonjol dan bagaimana Vido Garment telah memenuhi atau melebihi ekspektasi Anda dalam hal kualitas produk dan layanan pelanggan. User akan memberikan clue yang menjadi acuan Anda dalam membuat testimoni tersebut: ',
+                },
+                { role: 'user', content: 'Clue (muatan isi) testimoni: ' + prompt },
+            ],
+        });
+
+        return response.choices[0].message.content.trim();
+    } catch (error) {
+        console.error('OpenAI Error:', error);
+        throw new Error('An error occurred while processing your request.');
+    }
+}
+
 module.exports = {
     generateResponseAsCS,
     generateImage,
+    generateTestimonial,
 };
