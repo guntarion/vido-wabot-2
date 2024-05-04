@@ -1,6 +1,7 @@
 const { Client, LocalAuth, MessageMedia } = require('../index'); // Adjust the path as necessary
 const qrcode = require('qrcode-terminal');
-// const handleMessage = require('./handleMessage');
+
+
 const {
     getUserState,
     updateUserState,
@@ -18,6 +19,8 @@ const {
     generateResponseAsCS,
     generateSlogan,
     generateTestimonial,
+    appendToGoogleSheet,
+    googleAuth,
 } = require('./openaiService');
 const translate = require('../src/googletranslate/index.js');
 
@@ -73,6 +76,31 @@ client.on('message', async (msg) => {
     } else if (msg.body === '!ping reply') {
         msg.reply('pong');
     } 
+    else if (msg.body.startsWith('sizereg ')) {
+        const isiRegistrasiSize = msg.body.slice(8);
+        const parts = isiRegistrasiSize.split(' ');
+        const kodeOrder = parts[0];
+        const size = parts[1].toUpperCase();
+        const name = parts[2].toUpperCase();
+        let info = client.info;
+        const now = new Date();
+        const formattedDateTime = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        const sender = await msg.getContact();
+        const data = {
+            dateTime: formattedDateTime,
+            contactPlatform: info.platform,
+            contactPublishedName: sender.pushname,
+            contactSavedName: sender.name,
+            contactNumber: sender.number,
+            kodeOrder: kodeOrder,
+            size: size,
+            name: name,
+        };
+        msg.react('📝');
+        await appendToGoogleSheet(googleAuth, 'entriSize', data);
+        await replyWithDelay(chat, msg, 'Terima kasih. Entri size Anda kami catat.');
+    } 
+
     else if (msg.body.toLowerCase().startsWith('ask ')) {
         const prompt = msg.body.slice(4);
         

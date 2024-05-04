@@ -136,6 +136,46 @@ async function generateTestimonial(prompt) {
     }
 }
 
+const { google } = require('googleapis');
+
+const googleAuth = new google.auth.GoogleAuth({
+    keyFile: 'hardy-position-391701-f77f2a757d7d.json',
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+});
+
+async function appendToGoogleSheet(auth, range, data) {
+    const spreadsheetId = '1w7c0MOhPHBbti6Lh49MpkuerAfI9XF8k_Et6Z8B8aGY';
+    const sheets = google.sheets({ version: 'v4', auth });
+
+    try {
+        const response = await sheets.spreadsheets.values.append({
+            spreadsheetId: spreadsheetId,
+            range: range,
+            valueInputOption: 'USER_ENTERED',
+            insertDataOption: 'INSERT_ROWS',
+            resource: {
+                values: [
+                    [
+                        data.dateTime,
+                        'FALSE',
+                        data.contactNumber,
+                        data.contactPlatform,
+                        data.contactPublishedName,
+                        data.contactSavedName,
+                        data.kodeOrder,
+                        data.size,
+                        data.name,
+                    ],
+                ],
+            },
+        });
+        console.log(response.data);
+    } catch (err) {
+        console.error('The API returned an error: ' + err);
+    }
+}
+
+
 module.exports = {
     generateResponseAsCS,
     generateLogoBordir,
@@ -143,4 +183,6 @@ module.exports = {
     generateSlogan,
     generateDesainKaos,
     generateTestimonial,
+    appendToGoogleSheet,
+    googleAuth,
 };
