@@ -11,7 +11,14 @@ const {
 } = require('./stateManager');
 const { getNextStepMessage, conversationPricingKaos, conversationTestimoni, conversationDesainKaos, conversationSizeFitting, } = require('./conversationFlow');
 const { replyWithDelay, sendMessageWithDelay } = require('./utility');
-const { generateLogoBordir, generateDesainKaos, generateResponseAsCS, generateTestimonial } = require('./openaiService');
+const {
+    generateLogoBordir,
+    generateDesainSablon,
+    generateDesainKaos,
+    generateResponseAsCS,
+    generateSlogan,
+    generateTestimonial,
+} = require('./openaiService');
 const translate = require('../src/googletranslate/index.js');
 
 const client = new Client({
@@ -82,11 +89,46 @@ client.on('message', async (msg) => {
                 );
             });
     }
+    else if (msg.body.toLowerCase().startsWith('slogan ')) {
+        const userRequirement = msg.body.slice(7);
+        const requirement = await translate(userRequirement, {from: 'id', to: 'en',});
+        // await sendMessageWithDelay(client, chat, msg, 'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk generate logo Anda 😊');
+        generateSlogan(requirement.text)
+            .then(async (response) => {
+                await client.sendMessage(msg.from, response);
+            })
+            .catch((error) => {
+                console.error('OpenAI Error:', error);
+                msg.reply(
+                    'Sorry, I encountered an error while processing your request.'
+                );
+            });
+    }
     else if (msg.body.toLowerCase().startsWith('logobordir ')) {
         const userRequirement = msg.body.slice(11);
         const requirement = await translate(userRequirement, {from: 'id', to: 'en',});
-        await sendMessageWithDelay(client, chat, msg, 'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk ini 😊');
+        await sendMessageWithDelay(client, chat, msg, 'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk generate logo Anda 😊');
         generateLogoBordir(requirement.text)
+            .then(async (imageUrl) => {
+                // console.log('Image URL:', imageUrl);
+                const media = await MessageMedia.fromUrl(imageUrl);
+                // console.log('Media:', media);
+
+                // Send the image as an attachment
+                await client.sendMessage(msg.from, media);
+            })
+            .catch((error) => {
+                console.error('OpenAI Error:', error);
+                msg.reply(
+                    'Sorry, I encountered an error while processing your request.'
+                );
+            });
+    } 
+    else if (msg.body.toLowerCase().startsWith('desainsablon ')) {
+        const userRequirement = msg.body.slice(13);
+        const requirement = await translate(userRequirement, {from: 'id', to: 'en',});
+        await sendMessageWithDelay(client, chat, msg, 'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk meng-generate desain sablon Anda 😊');
+        generateDesainSablon(requirement.text)
             .then(async (imageUrl) => {
                 // console.log('Image URL:', imageUrl);
                 const media = await MessageMedia.fromUrl(imageUrl);

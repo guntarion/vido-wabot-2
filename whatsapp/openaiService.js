@@ -46,6 +46,30 @@ async function generateLogoBordir(requirement) {
     }
 }
 
+async function generateDesainSablon(requirement) {
+    const myPrompt =
+        'Create an image of ' +
+        requirement +
+        '. The design should be clear, bold, with sharp lines, minimal details, and also minimal gradients.  The colors used should be distinct and separable, avoiding overly complex shading or color blending. The background should be simple or non-existent to emphasize the main design. This image should be creative and capable of being a standout piece on merchandise.';
+    console.log('My Desain Sablon Prompt:', myPrompt);
+    try {
+        const response = await openai.images.generate({
+            model: 'dall-e-3',
+            // model: 'dall-e-2',
+            prompt: myPrompt,
+            n: 1,
+            size: '1024x1024',
+        });
+
+        const imageUrl = response.data[0].url;
+
+        return imageUrl;
+    } catch (error) {
+        console.error(error);
+        throw new Error('An error occurred while generating the image');
+    }
+}
+
 
 async function generateDesainKaos(myPrompt) {
     try {
@@ -63,6 +87,30 @@ async function generateDesainKaos(myPrompt) {
     } catch (error) {
         console.error(error);
         throw new Error('An error occurred while generating the image');
+    }
+}
+
+async function generateSlogan(requirement) {
+    const myPrompt =
+        'Create a concise and impactful slogan that captures the essence of the following description:  ' +
+        requirement +
+        '. The slogan should be short, memorable, and thought-provoking, making it suitable for use on a t-shirt. It should be able to convey the main idea or message of the description in a few words, while also being visually appealing and easy to read. Please ensure that the slogan is: Concise (less than 17 words), Clear and easy to understand, Thought-provoking and memorable, Suitable for use on a t-shirt.';
+    console.log('My Slogan Prompt:', myPrompt);
+    try {
+        const response = await openai.chat.completions.create({
+            model: 'gpt-3.5-turbo',
+            messages: [
+                {
+                    role: 'system',
+                    content: myPrompt,
+                },
+            ],
+        });
+
+        return response.choices[0].message.content.trim();
+    } catch (error) {
+        console.error('OpenAI Error:', error);
+        throw new Error('An error occurred while processing your request.');
     }
 }
 
@@ -91,6 +139,8 @@ async function generateTestimonial(prompt) {
 module.exports = {
     generateResponseAsCS,
     generateLogoBordir,
+    generateDesainSablon,
+    generateSlogan,
     generateDesainKaos,
     generateTestimonial,
 };
