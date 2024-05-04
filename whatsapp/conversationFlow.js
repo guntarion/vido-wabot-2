@@ -53,16 +53,21 @@ const conversationDesainKaos = {
     steps: {
         askJenisKaos: {
             message:
-                'Jenis kaos apa yang rencana Anda buat?\n(Silahkan merespon dg menulis angka 1 atau 2 atau 3)\n\n1 Kaos Oblong\n2 Kaos Kerah\n3 Kaos Raglan',
-            nextStep: 'askLokasiSablon',
+                'Jenis kaos apa yang rencana Anda buat?\n(Silahkan merespon dg menulis angka 1 atau 2 atau 3)\n\n1 Kaos T-Shirt Biasa\n2 Kaos Berkerah (Polo)\n3 Kaos Raglan',
+            nextStep: 'askWarnaKaos',
         },
-        askLokasiSablon: {
+        askWarnaKaos: {
             message:
-                'Di mana lokasi sablon-nya?\n\n1.Di depan tengah\n2. Di dada kiri\n3. Di dada kanan\n4. Di punggung',
+                'Sebutkan warna bagian tubuhnya',
+            nextStep: 'askWarnaLengan',
+        },
+        askWarnaLengan: {
+            message:
+                'Sebutkan warna bagian lengannya',
             nextStep: 'askDeskripsiSablon',
         },
         askDeskripsiSablon: {
-            message: 'Deskripsikan gambar yang Anda inginkan?',
+            message: 'Deskripsikan gambar yang Anda inginkan tampak di kaosnya.',
             nextStep: null, // End of conversation
         },
     },

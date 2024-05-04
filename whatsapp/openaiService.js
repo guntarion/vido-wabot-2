@@ -22,14 +22,12 @@ async function generateResponseAsCS(prompt) {
     }
 }
 
-async function generateImage(prompt) {
-
-    // const myPrompt = 'Buatkan desain sablon dalam deskripsi berikut: ' + prompt + '; yang berada di kaos lengan pendek tampak depan. Sesuaikan warna kaos agar sesuai dengan tema desainnya.';
+async function generateLogoBordir(requirement) {
     const myPrompt =
-        'Please create a detailed, multi-colored plastisol screen print design for a short-sleeve t-shirt. The design should include the following image: [' +
-        prompt +
-        '], featuring vibrant colors and a dynamic composition. The style should be bold and visually appealing, suitable for a fashionable t-shirt. Ensure the design is suitable for screen printing with plastisol ink, which may include considerations for color layering and separations. The image should capture the energy and creativity typical of contemporary streetwear. Please make sure all parts of the screen printed image are visible, not cut off. ';
-
+        'Create a professional-looking logo design, in one image, depicting: ' +
+        requirement +
+        '. The logo should have a solid background color, with no gradients or shadows. The design should be simple, yet distinctive and memorable. The logo should be scalable to various sizes without losing its clarity. The design should be created using a limited color palette, with a maximum of 4 colors. The logo should be designed in a way that it can be easily embroidered on various fabrics, including cotton, polyester, and blends. The design should be clean, crisp, and visually appealing. The design should be simple enough to be easily recognizable and memorable, yet unique enough to stand out from other logos. The design should be created with the intention of being used on embroidery.';
+    console.log('My Logo Bordir Prompt:', myPrompt);
     try {
         const response = await openai.images.generate({
             model: 'dall-e-3',
@@ -41,6 +39,26 @@ async function generateImage(prompt) {
 
         const imageUrl = response.data[0].url;
 
+        return imageUrl;
+    } catch (error) {
+        console.error(error);
+        throw new Error('An error occurred while generating the image');
+    }
+}
+
+
+async function generateDesainKaos(myPrompt) {
+    try {
+        const response = await openai.images.generate({
+            model: 'dall-e-3',
+            // model: 'dall-e-2',
+            prompt: myPrompt,
+            n: 1,
+            size: '1024x1024', // the minimum size for DaLL-E-3
+            // size: '512x512', // the minimum size for DaLL-E-2
+        });
+        const imageUrl = response.data[0].url;
+        console.log('Image URL:', imageUrl);
         return imageUrl;
     } catch (error) {
         console.error(error);
@@ -72,6 +90,7 @@ async function generateTestimonial(prompt) {
 
 module.exports = {
     generateResponseAsCS,
-    generateImage,
+    generateLogoBordir,
+    generateDesainKaos,
     generateTestimonial,
 };

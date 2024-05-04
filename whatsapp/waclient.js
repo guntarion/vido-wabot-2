@@ -11,7 +11,8 @@ const {
 } = require('./stateManager');
 const { getNextStepMessage, conversationPricingKaos, conversationTestimoni, conversationDesainKaos, conversationSizeFitting, } = require('./conversationFlow');
 const { replyWithDelay, sendMessageWithDelay } = require('./utility');
-const { generateImage, generateResponseAsCS, generateTestimonial } = require('./openaiService');
+const { generateLogoBordir, generateDesainKaos, generateResponseAsCS, generateTestimonial } = require('./openaiService');
+const translate = require('../src/googletranslate/index.js');
 
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -56,6 +57,10 @@ client.on('message', async (msg) => {
         });
         const replyMessage = `WA-Bot Vido is up and running 🚀\nMasehi: ${masehiDateTime}`;
         await replyWithDelay(chat, msg, replyMessage);
+        // translate('Anak Kucing warna putih sedang bermain bola bersama dua anjing', {from: 'id', to: 'en'}).then(result => {
+        //     console.log(result.text); // Outputs: 'Hola mundo'
+        //     msg.reply(result.text);
+        // });
     } else if (msg.body.startsWith('!ping')) {
         await replyWithDelay(chat, msg, 'pong');
     } else if (msg.body === '!ping reply') {
@@ -63,7 +68,7 @@ client.on('message', async (msg) => {
     } 
     else if (msg.body.toLowerCase().startsWith('ask ')) {
         const prompt = msg.body.slice(4);
-
+        
         generateResponseAsCS(prompt)
             .then((response) => {
                 // Send the response text back to the user
@@ -77,13 +82,15 @@ client.on('message', async (msg) => {
                 );
             });
     }
-    else if (msg.body.toLowerCase().startsWith('sablon ')) {
-        const prompt = msg.body.slice(7);
-        generateImage(prompt)
+    else if (msg.body.toLowerCase().startsWith('logobordir ')) {
+        const userRequirement = msg.body.slice(11);
+        const requirement = await translate(userRequirement, {from: 'id', to: 'en',});
+        await sendMessageWithDelay(client, chat, msg, 'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk ini 😊');
+        generateLogoBordir(requirement.text)
             .then(async (imageUrl) => {
-                console.log('Image URL:', imageUrl);
+                // console.log('Image URL:', imageUrl);
                 const media = await MessageMedia.fromUrl(imageUrl);
-                console.log('Media:', media);
+                // console.log('Media:', media);
 
                 // Send the image as an attachment
                 await client.sendMessage(msg.from, media);
@@ -94,7 +101,8 @@ client.on('message', async (msg) => {
                     'Sorry, I encountered an error while processing your request.'
                 );
             });
-    } else if (msg.body.toLowerCase() === 'harga kaos') {
+    } 
+    else if (msg.body.toLowerCase() === 'harga kaos') {
         initializeUserState(userId, conversationPricingKaos);
         activateConversation(userId);
         const initialMessage = getNextStepMessage(conversationPricingKaos, 'askJenisKaos'); // Use the first step from the specific conversation
@@ -170,7 +178,23 @@ async function processFinalStep(msg, userId, chat, conversationType) {
         }
         break;
     case 'desainKaos':
-        await sendMessageWithDelay(client, chat, msg, 'Desain Anda telah kami terima dan akan segera diproses.');
+        await sendMessageWithDelay(client, chat, msg, 'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk ini 😊');    
+        // eslint-disable-next-line no-case-declarations
+        const desainKaosPrompt = await suggestDesainKaos(responses);
+        // Generate the design image from the prompt
+        generateDesainKaos(desainKaosPrompt)
+            .then(async (imageUrl) => {
+                console.log('Design Image URL:', imageUrl);
+                const media = await MessageMedia.fromUrl(imageUrl);
+                console.log('Media:', media);
+                // Send the image as an attachment
+                // await client.sendMessage(msg.from, media, { caption: desainKaosPrompt });
+                await client.sendMessage(msg.from, media, { caption: 'Berikut mockup desain untuk Anda, dari Vido AI' });
+            })
+            .catch(async (error) => {  // Note the async keyword here
+                console.error('Error in generating design:', error);
+                await sendMessageWithDelay(client, chat, msg, 'Sorry, I encountered an error while processing your design request.');
+            });
         break;
     case 'sizeFitting':
         await sendMessageWithDelay(client, chat, msg, 'Detail ukuran telah dicatat. Terima kasih telah mengonfirmasi ukuran Anda.');
@@ -184,18 +208,58 @@ async function processFinalStep(msg, userId, chat, conversationType) {
     initializeUserState(userId);
 }
 
+async function suggestDesainKaos(responses) {
+    // Define responses based on the user's selection
+    const responJenisKaosOptions = [
+        'Generate a high-quality image of a simple, everyday t-shirt. The t-shirt should have a classic design with short sleeves and a round neckline. It should be displayed on a plain white background to emphasize its details. The neckline should be a classic crew neck, and the sleeves should be short and relaxed. The image should include details such as a subtle texture or weave to the fabric.',
+        'Create a high-quality image of a polo shirt. The shirt should have a solid color background, with a classic and clean design. The polo collar should be prominent, with a subtle button placket and a relaxed fit. The image should include details such as a subtle texture or weave to the fabric, the cuffs should be ribbed, and a classic button placket with 2-3 buttons.',
+        'Create a high-quality image of a raglan shirt. The shirt should have a solid color background, with a simple and clean design. The raglan sleeve should be prominent, with a seamless integration into the body of the shirt.  The shirt should have a relaxed fit, with a slightly fitted silhouette. The collar should be a classic crew neck, and the cuffs should be ribbed. The image should include a subtle texture or weave to the fabric.',
+    ];
+    // const responLokasiSablonOptions = [
+    //     'front middle',
+    //     'left chest',
+    //     'right chest',
+    //     'the back',
+    // ];
 
-// function suggestTestimonial(responses) {
+    // Extracting responses
+    const responJenisKaos = responJenisKaosOptions[responses.askJenisKaos - 1];
+    // const responLokasiSablon = responLokasiSablonOptions[responses.askLokasiSablon - 1];
+    const responWarnaKaos = responses.askWarnaKaos; // Directly use the response
+    const responWarnaLengan = responses.askWarnaLengan; // Directly use the response
+    const responDeskripsiSablon = responses.askDeskripsiSablon;
 
-//     const { askAlasanMemilih, askKesanPertama, askKesanTerakhir, askMerekomendasikan } = responses;
+    // Translate responses
+    const translatedWarnaKaos = await translate(responWarnaKaos, {from: 'id', to: 'en',});
+    const translatedWarnaLengan = await translate(responWarnaLengan, {from: 'id', to: 'en',});
+    const translatedDeskripsiSablon = await translateIntoEnglish(responDeskripsiSablon, {from: 'id',to: 'en',});
 
-//     console.log(`askAlasanMemilih: ${askAlasanMemilih}`);
-//     console.log(`askKesanPertama: ${askKesanPertama}`);
-//     console.log(`askKesanTerakhir: ${askKesanTerakhir}`);
-//     console.log(`askMerekomendasikan: ${askMerekomendasikan}`);
+    // Create the full design prompt
+    const desainKaosPrompt = `
+        ${responJenisKaos} 
+        The color of shirt body is ${translatedWarnaKaos.text}. 
+        The color of the sleeves is ${translatedWarnaLengan.text}. 
+        The front side of it has a colorful picture of: ${translatedDeskripsiSablon.text}.
+    `;
+    // console.log('Desain Kaos Prompt:', desainKaosPrompt);
 
-//     return rekomendasiTestimonial;
-// }
+    return desainKaosPrompt.trim(); // Clean up any extra spaces or new lines
+}
+
+// Translate helper function using a pseudo-translation module
+async function translateIntoEnglish(text, options) {
+    return new Promise((resolve, reject) => {
+        try {
+            const translate = require('../src/googletranslate/index.js');
+            translate(text, options).then((result) => {
+                resolve(result);
+            });
+        } catch (error) {
+            console.error('Translation Error:', error);
+            reject(error);
+        }
+    });
+}
 
 
 async function suggestTestimonial(responses) {
