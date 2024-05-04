@@ -1,5 +1,6 @@
 const { Client, LocalAuth, MessageMedia } = require('../index'); // Adjust the path as necessary
 const qrcode = require('qrcode-terminal');
+const fs = require('fs');
 
 
 const {
@@ -76,6 +77,21 @@ client.on('message', async (msg) => {
     } else if (msg.body === '!ping reply') {
         msg.reply('pong');
     } 
+    else if (msg.body === '!chats') {
+        const chats = await client.getChats();
+        console.log(chats); // to see the content in the console
+
+        // Save it in a JSON file
+        fs.writeFile('allchats.json', JSON.stringify(chats, null, 2), (err) => {
+            if (err) {
+                console.error('Error writing file:', err);
+            } else {
+                console.log('File written successfully');
+            }
+        });
+        client.sendMessage(msg.from, `The bot has ${chats.length} chats open.`);
+    }
+
     else if (msg.body.startsWith('sizereg ')) {
         const isiRegistrasiSize = msg.body.slice(8);
         const parts = isiRegistrasiSize.split(' ');

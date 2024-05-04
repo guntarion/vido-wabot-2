@@ -1,7 +1,7 @@
 const getContentButton = document.getElementById('get-content');
 const getResponseRecommendationButton = document.getElementById('response-recommendation');
 
-// This function fetches chat data from the server and displays messages for a specific chatId
+// This function fetches chat data from the apiRoutes and displays messages for a specific chatId
 // eslint-disable-next-line no-unused-vars
 function loadMessages(chatId) {
     // console.log('Loading messages for chat:', chatId);
