@@ -66,6 +66,7 @@ client.on('message', async (msg) => {
     const userState = getUserState(userId);
 
     if (msg.body === '.status') {
+        chat.sendSeen();
         const currentDate = new Date();
         const masehiDateTime = currentDate.toLocaleString('en-US', {
             timeZone: 'Asia/Jakarta',
@@ -79,8 +80,16 @@ client.on('message', async (msg) => {
     } else if (msg.body.startsWith('!ping')) {
         await replyWithDelay(chat, msg, 'pong');
     } else if (msg.body === '!ping reply') {
+        chat.sendSeen();
         msg.reply('pong');
     } 
+
+    // TODO: test out link preview
+    else if (msg.body.startsWith('!preview ')) {
+        const text = msg.body.slice(9);
+        msg.reply(text, null, { linkPreview: true });   
+    }
+
     else if (msg.body === '!chats') {
         const chats = await client.getChats();
         console.log(chats); // to see the content in the console
@@ -97,6 +106,7 @@ client.on('message', async (msg) => {
     }
 
     else if (msg.body.startsWith('sizereg ')) {
+        chat.sendSeen();
         const isiRegistrasiSize = msg.body.slice(8);
         const parts = isiRegistrasiSize.split(' ');
         const kodeOrder = parts[0];
@@ -116,6 +126,7 @@ client.on('message', async (msg) => {
             size: size,
             name: name,
         };
+        chat.sendSeen();
         msg.react('📝');
         await appendToGoogleSheet(googleAuth, 'entriSize', data);
         await replyWithDelay(chat, msg, 'Terima kasih. Entri size Anda kami catat.');
@@ -123,7 +134,7 @@ client.on('message', async (msg) => {
 
     else if (msg.body.toLowerCase().startsWith('askcs1 ')) {
         const prompt = msg.body.slice(7);
-        
+        chat.sendSeen();
         generateResponseAsCS(prompt)
             .then((response) => {
                 // Send the response text back to the user
@@ -142,7 +153,7 @@ client.on('message', async (msg) => {
         console.log('Received a question to ask the knowledgebase.');
         const input = msg.body.slice(7);
         console.log('Input:', input);
-
+        chat.sendSeen();
         const url = 'http://localhost:3010/ask';
 
         // Send the question to the local endpoint
@@ -164,7 +175,7 @@ client.on('message', async (msg) => {
             .catch((error) => {
                 console.error('Error:', error);
             });
-    } else if (msg.body.toLowerCase() === 'quit') {
+    } else if (['quit', 'cukup', 'berhenti', 'stop'].includes(msg.body.toLowerCase())) {
         // Remove user from conversation map if they want to quit
         userConversations.delete(msg.from);
         msg.reply('Anda telah mengakhiri percakapan dengan bot cs.');
@@ -208,10 +219,8 @@ client.on('message', async (msg) => {
             });
     } else if (msg.body.toLowerCase().startsWith('slogan ')) {
         const userRequirement = msg.body.slice(7);
-        const requirement = await translate(userRequirement, {
-            from: 'id',
-            to: 'en',
-        });
+        chat.sendSeen();
+        const requirement = await translate(userRequirement, {from: 'id', to: 'en',});
         // await sendMessageWithDelay(client, chat, msg, 'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk generate logo Anda 😊');
         generateSlogan(requirement.text)
             .then(async (response) => {
@@ -225,6 +234,7 @@ client.on('message', async (msg) => {
             });
     } else if (msg.body.toLowerCase().startsWith('logobordir ')) {
         const userRequirement = msg.body.slice(11);
+        chat.sendSeen();
         const requirement = await translate(userRequirement, {
             from: 'id',
             to: 'en',
@@ -252,6 +262,7 @@ client.on('message', async (msg) => {
             });
     } else if (msg.body.toLowerCase().startsWith('desainsablon ')) {
         const userRequirement = msg.body.slice(13);
+        chat.sendSeen();
         const requirement = await translate(userRequirement, {
             from: 'id',
             to: 'en',
@@ -278,6 +289,7 @@ client.on('message', async (msg) => {
                 );
             });
     } else if (msg.body.toLowerCase() === 'harga kaos') {
+        chat.sendSeen();
         initializeUserState(userId, conversationPricingKaos);
         activateConversation(userId);
         const initialMessage = getNextStepMessage(
@@ -289,6 +301,7 @@ client.on('message', async (msg) => {
         await sendMessageWithDelay(client, chat, msg, initialMessage);
         // Do not update the user state here. It should be updated after the user responds.
     } else if (msg.body.toLowerCase() === 'feedback') {
+        chat.sendSeen();
         initializeUserState(userId, conversationTestimoni);
         activateConversation(userId);
         const initialMessage = getNextStepMessage(
@@ -297,6 +310,7 @@ client.on('message', async (msg) => {
         );
         await sendMessageWithDelay(client, chat, msg, initialMessage);
     } else if (msg.body.toLowerCase() === 'desain kaos') {
+        chat.sendSeen();
         initializeUserState(userId, conversationDesainKaos);
         activateConversation(userId);
         const initialMessage = getNextStepMessage(
@@ -305,6 +319,7 @@ client.on('message', async (msg) => {
         );
         await sendMessageWithDelay(client, chat, msg, initialMessage);
     } else if (msg.body.toLowerCase() === 'size order') {
+        chat.sendSeen();
         initializeUserState(userId, conversationSizeFitting);
         activateConversation(userId);
         const initialMessage = getNextStepMessage(
