@@ -7,11 +7,50 @@ const OpenAI = require('openai');
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
 const { sendMessage, sendMessages } = require('../whatsapp/sendMessage');
+const {
+    extractText,
+    fetchSEOInformation,
+} = require('../public/js/pageutility');
 
 // Health check route
 router.get('/health', (req, res) => {
     console.log('Server is running healthy =====');
     res.json({ success: true, message: 'Server is running healthy' });
+});
+
+
+router.post('/fetch-text', async (req, res) => {
+    const url = req.body.url; // Get the URL from the request body
+    if (!url) {
+        return res
+            .status(400)
+            .json({ success: false, message: 'No URL provided' });
+    }
+
+    try {
+        const text = await extractText(url);
+        res.json({ success: true, data: text });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch text',
+        });
+    }
+});
+
+router.post('/fetch-seo', async (req, res) => {
+    const url = req.body.url;
+    try {
+        const seoData = await fetchSEOInformation(url);
+        res.json({ success: true, data: seoData });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch SEO information',
+        });
+    }
 });
 
 /*
@@ -105,6 +144,50 @@ router.post('/openai-shirt-generation', async (req, res) => {
         res.status(500).json({ error: 'An error occurred while generating the image' });
     }
 });
+
+
+router.post('/openai-rekomendasi-seragam', async (req, res) => {
+    const { seometadata, kontenfrontpage } = req.body;
+
+    const completion = await openai.chat.completions.create({
+        messages: [
+            {
+                role: 'system',
+                content:
+                    'Untuk perusahaan berikut' +
+                    seometadata +
+                    ' dan konten frontpage' +
+                    kontenfrontpage +
+                    ' Berdasarkan informasi profil perusahaan yang telah diperoleh dari frontpage website perusahaan melalui proses scraping, silakan identifikasi jenis dan nature dari usaha perusahaan tersebut. Gunakan informasi yang tersedia untuk memahami sektor industri, lingkungan kerja, dan nilai-nilai perusahaan. Setelah memahami konteks bisnisnya, buatlah rekomendasi tentang jenis seragam yang paling sesuai untuk karyawan perusahaan tersebut. Rekomendasikan salah satu atau beberapa dari jenis seragam berikut berdasarkan nature usahanya: 1. Seragam Jaket Bomber: Biasanya digunakan di lingkungan kerja yang memerlukan ketahanan terhadap cuaca dingin dan angin, seperti di lapangan terbuka atau di area dengan suhu yang lebih rendah. Jaket ini juga sering dipilih untuk pekerjaan yang memerlukan mobilitas tinggi karena memberikan kehangatan tanpa mengorbankan gerak. 2. Wearpack - untuk usaha yang melibatkan pekerjaan berisiko tinggi dan memerlukan perlindungan serta kepatuhan terhadap regulasi keselamatan. 3. Seragam Retail dengan model Polo Kasual - untuk perusahaan ritel yang ingin menonjolkan branding toko dan menciptakan tampilan yang profesional namun santai. 4. Seragam Jaket Hoodie: Cocok untuk lingkungan kerja kasual yang memerlukan kenyamanan dan fleksibilitas. Jaket hoodie sering digunakan di industri kreatif, startup, atau perusahaan teknologi, di mana suasana yang lebih santai dan tidak terlalu formal dihargai. 5. Seragam Jaket Biasa: Ideal untuk lingkungan kerja luar ruangan yang membutuhkan perlindungan dari cuaca, tetapi tidak seintens jaket bomber. Bisa juga digunakan dalam setting kasual di kantor yang memiliki suhu yang sejuk akibat penggunaan AC. 6. Seragam Kaos Raglan: Kaos dengan lengan yang sering berbeda warna dari bagian badan kaos. Kaos ini nyaman dan memberikan keleluasaan gerak yang baik, cocok untuk lingkungan kerja yang aktif atau untuk acara perusahaan yang lebih santai. 7. Seragam Kaos T-shirt: untuk industri yang tampak padat karya dan membutuhkan kenyamanan serta fleksibilitas. Cocok untuk pekerjaan dalam ruangan atau cuaca hangat, serta dalam event promosi atau sebagai seragam harian yang praktis dan nyaman. 8. Seragam Kaos Polo: Menawarkan tampilan yang lebih rapi dibandingkan kaos t-shirt biasa dan sering digunakan di lingkungan yang membutuhkan tampilan semi-formal seperti di perbankan, hotel, atau acara perusahaan. Juga populer di industri jasa dan ritel. 9. Seragam Kemeja Lengan Pendek: Sesuai untuk lingkungan kerja yang semi-formal dan cuaca panas. Sering digunakan di kantor atau oleh pekerja lapangan yang membutuhkan kesan rapi namun tetap ingin kenyamanan dalam cuaca yang lebih hangat. 10. Seragam Kemeja Lengan Panjang: Pilihan untuk lingkungan kerja formal. Memberikan tampilan yang profesional dan sering diwajibkan dalam setting bisnis tradisional, pertemuan penting, atau acara resmi perusahaan.'
+            },
+        ],
+        model: 'gpt-3.5-turbo',
+    });
+
+    res.json({ message: completion.choices[0].message.content });
+});
+
+router.post('/openai-buat-penawaran', async (req, res) => {
+    const { seometadata, rekomendasiproduk } = req.body;
+
+    const completion = await openai.chat.completions.create({
+        messages: [
+            {
+                role: 'system',
+                content:
+                    'Buatkan surat penawaran resmi dari Vido Garment Indonesia, sebuah perusahaan yang berpengalaman selama 14 tahun dalam pembuatan seragam, dengan ulasan positif dari lebih dari 1000 reviewer di Google. Surat ini ditujukan kepada' +
+                    seometadata +
+                    ' dengan tujuan mengajukan penawaran untuk pembuatan seragam yang telah disesuaikan berdasarkan profil usaha mereka, yakni sebagai berikut: ' +
+                    rekomendasiproduk +
+                    'Surat harus ditulis dalam bahasa Indonesia dengan gaya bahasa yang sangat ramah dan menarik. Sertakan penjelasan bahwa seragam yang direkomendasikan oleh Vido Garment adalah hasil pengamatan cermat terhadap profil usaha klien untuk memastikan seragam tersebut mendukung kebutuhan spesifik mereka. Alasan utama pembuatan seragam ini harus mencakup, tetapi tidak terbatas pada Peningkatan Citra Perusahaan, Pemersatu Karyawan, Promosi dan Branding, Keamanan dan Keselamatan, Identifikasi Mudah, Kenyamanan dan Fungsionalitas, Persyaratan Regulasi, Pengurangan Biaya untuk Karyawan. Akhir surat harus menawarkan untuk menjawab pertanyaan lebih lanjut atau mengatur pertemuan untuk mendiskusikan detail lebih lanjut. Berikan informasi kontak Vido Garment untuk menghubungi customer service di nomor 08123456789. Pastikan surat tersebut mencerminkan profesionalisme dan dedikasi Vido Garment dalam memberikan pelayanan terbaik kepada klien mereka.',
+            },
+        ],
+        model: 'gpt-3.5-turbo',
+    });
+
+    res.json({ message: completion.choices[0].message.content });
+});
+
 
 
 

@@ -1,3 +1,25 @@
+// openaiService.js
+
+// const fs = require('fs');
+// const csv = require('csv-parser');
+
+// const rows = [];
+// const path = require('path');
+// const csvFilePath = path.resolve(__dirname, '../src/data/data-pt.csv');
+
+// console.log(csvFilePath);
+
+// fs.createReadStream(csvFilePath)
+//     .pipe(csv())
+//     .on('data', (row) => {
+//         rows.push(row);
+//     })
+//     .on('end', () => {
+//         console.log('CSV file successfully processed');
+//     });
+
+
+
 const OpenAI = require('openai');
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 

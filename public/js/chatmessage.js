@@ -1,6 +1,30 @@
 const getContentButton = document.getElementById('get-content');
 const getResponseRecommendationButton = document.getElementById('response-recommendation');
 
+
+fetch('/api/data') // Replace '/api/data' with the URL of your API
+    .then((response) => response.json())
+    .then((data) => {
+        const rows = data; // Assign the fetched data to 'rows'
+
+        // Now you can use 'rows' in your 'forEach' loop
+        rows.forEach((row) => {
+            const tr = document.createElement('tr');
+
+            Object.values(row).forEach((cell) => {
+                const td = document.createElement('td');
+                td.textContent = cell;
+                tr.appendChild(td);
+            });
+
+            const tableBody = document.querySelector('#chatDataTable tbody');
+            if (tableBody) {
+                tableBody.appendChild(tr);
+            }
+        });
+    })
+    .catch((error) => console.error('Failed to fetch data:', error));
+
 // This function fetches chat data from the apiRoutes and displays messages for a specific chatId
 // eslint-disable-next-line no-unused-vars
 function loadMessages(chatId) {

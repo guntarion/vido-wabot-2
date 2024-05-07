@@ -23,7 +23,7 @@ router.get('/chats', (req, res) => {
         }
         const chats = JSON.parse(data);
 
-        res.render('chats', {
+        res.render('chat-individual', {
             title: 'Chats',
             chats: chats,
         });
@@ -35,8 +35,12 @@ router.get('/datachat', (req, res) => {
     res.render('datachat', { title: 'Data Chat' });
 });
 
-router.get('/message', (req, res) => {
-    res.render('message', { title: 'Kirim Pesan' });
+router.get('/prospek', (req, res) => {
+    res.render('prospek-usaha', { title: 'Prospek Usaha' });
+});
+
+router.get('/broadcast', (req, res) => {
+    res.render('broadcast', { title: 'Kirim Pesan' });
 });
 
 router.get('/forms', (req, res) => {
