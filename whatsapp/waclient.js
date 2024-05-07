@@ -121,8 +121,8 @@ client.on('message', async (msg) => {
         await replyWithDelay(chat, msg, 'Terima kasih. Entri size Anda kami catat.');
     } 
 
-    else if (msg.body.toLowerCase().startsWith('ask ')) {
-        const prompt = msg.body.slice(4);
+    else if (msg.body.toLowerCase().startsWith('askcs1 ')) {
+        const prompt = msg.body.slice(7);
         
         generateResponseAsCS(prompt)
             .then((response) => {
@@ -138,14 +138,45 @@ client.on('message', async (msg) => {
             });
     }
 
-    else if (msg.body.toLowerCase() === 'quit') {
+    else if (msg.body.toLowerCase().startsWith('askcs2 ')) {
+        console.log('Received a question to ask the knowledgebase.');
+        const input = msg.body.slice(7);
+        console.log('Input:', input);
+
+        const url = 'http://localhost:3010/ask';
+
+        // Send the question to the local endpoint
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                question: input,
+                collection: 'vido',
+            }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                // Reply with the answer
+                msg.reply(data.result.text);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    } else if (msg.body.toLowerCase() === 'quit') {
         // Remove user from conversation map if they want to quit
         userConversations.delete(msg.from);
         msg.reply('Anda telah mengakhiri percakapan dengan bot cs.');
-    } else if (msg.body.toLowerCase().startsWith('chat ') || userConversations.has(msg.from)) {
+    } else if (
+        msg.body.toLowerCase().startsWith('chat ') ||
+        userConversations.has(msg.from)
+    ) {
         // Handles both initiating and continuing a conversation
         const userId = msg.from;
-        const prompt = msg.body.toLowerCase().startsWith('chat ') ? msg.body.slice(5).trim() : msg.body;
+        const prompt = msg.body.toLowerCase().startsWith('chat ')
+            ? msg.body.slice(5).trim()
+            : msg.body;
 
         let conversation = userConversations.get(userId);
         if (!conversation) {
@@ -163,21 +194,24 @@ client.on('message', async (msg) => {
         // Add the user's message to the conversation
         conversation.push({ role: 'user', content: prompt });
 
-        chatWithBot(conversation).then(response => {
-            // Add the bot's response to the conversation
-            conversation.push({ role: 'assistant', content: response });
+        chatWithBot(conversation)
+            .then((response) => {
+                // Add the bot's response to the conversation
+                conversation.push({ role: 'assistant', content: response });
 
-            // Send the response text back to the user
-            msg.reply(response);
-        }).catch(error => {
-            console.error('OpenAI Error:', error);
-            msg.reply('Sorry, there was an error processing your request.');
-        });
-    }
-
-    else if (msg.body.toLowerCase().startsWith('slogan ')) {
+                // Send the response text back to the user
+                msg.reply(response);
+            })
+            .catch((error) => {
+                console.error('OpenAI Error:', error);
+                msg.reply('Sorry, there was an error processing your request.');
+            });
+    } else if (msg.body.toLowerCase().startsWith('slogan ')) {
         const userRequirement = msg.body.slice(7);
-        const requirement = await translate(userRequirement, {from: 'id', to: 'en',});
+        const requirement = await translate(userRequirement, {
+            from: 'id',
+            to: 'en',
+        });
         // await sendMessageWithDelay(client, chat, msg, 'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk generate logo Anda 😊');
         generateSlogan(requirement.text)
             .then(async (response) => {
@@ -189,11 +223,18 @@ client.on('message', async (msg) => {
                     'Sorry, I encountered an error while processing your request.'
                 );
             });
-    }
-    else if (msg.body.toLowerCase().startsWith('logobordir ')) {
+    } else if (msg.body.toLowerCase().startsWith('logobordir ')) {
         const userRequirement = msg.body.slice(11);
-        const requirement = await translate(userRequirement, {from: 'id', to: 'en',});
-        await sendMessageWithDelay(client, chat, msg, 'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk generate logo Anda 😊');
+        const requirement = await translate(userRequirement, {
+            from: 'id',
+            to: 'en',
+        });
+        await sendMessageWithDelay(
+            client,
+            chat,
+            msg,
+            'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk generate logo Anda 😊'
+        );
         generateLogoBordir(requirement.text)
             .then(async (imageUrl) => {
                 // console.log('Image URL:', imageUrl);
@@ -209,11 +250,18 @@ client.on('message', async (msg) => {
                     'Sorry, I encountered an error while processing your request.'
                 );
             });
-    } 
-    else if (msg.body.toLowerCase().startsWith('desainsablon ')) {
+    } else if (msg.body.toLowerCase().startsWith('desainsablon ')) {
         const userRequirement = msg.body.slice(13);
-        const requirement = await translate(userRequirement, {from: 'id', to: 'en',});
-        await sendMessageWithDelay(client, chat, msg, 'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk meng-generate desain sablon Anda 😊');
+        const requirement = await translate(userRequirement, {
+            from: 'id',
+            to: 'en',
+        });
+        await sendMessageWithDelay(
+            client,
+            chat,
+            msg,
+            'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk meng-generate desain sablon Anda 😊'
+        );
         generateDesainSablon(requirement.text)
             .then(async (imageUrl) => {
                 // console.log('Image URL:', imageUrl);
@@ -229,11 +277,13 @@ client.on('message', async (msg) => {
                     'Sorry, I encountered an error while processing your request.'
                 );
             });
-    } 
-    else if (msg.body.toLowerCase() === 'harga kaos') {
+    } else if (msg.body.toLowerCase() === 'harga kaos') {
         initializeUserState(userId, conversationPricingKaos);
         activateConversation(userId);
-        const initialMessage = getNextStepMessage(conversationPricingKaos, 'askJenisKaos'); // Use the first step from the specific conversation
+        const initialMessage = getNextStepMessage(
+            conversationPricingKaos,
+            'askJenisKaos'
+        ); // Use the first step from the specific conversation
         // const initialMessage = getNextStepMessage('askJenisKaos'); // Ensure to use the initial step key
         // const initialMessage = getNextStepMessage(conversationPricingKaos, userState.step);
         await sendMessageWithDelay(client, chat, msg, initialMessage);
@@ -241,17 +291,26 @@ client.on('message', async (msg) => {
     } else if (msg.body.toLowerCase() === 'feedback') {
         initializeUserState(userId, conversationTestimoni);
         activateConversation(userId);
-        const initialMessage = getNextStepMessage(conversationTestimoni, 'askAlasanMemilih');
+        const initialMessage = getNextStepMessage(
+            conversationTestimoni,
+            'askAlasanMemilih'
+        );
         await sendMessageWithDelay(client, chat, msg, initialMessage);
     } else if (msg.body.toLowerCase() === 'desain kaos') {
         initializeUserState(userId, conversationDesainKaos);
         activateConversation(userId);
-        const initialMessage = getNextStepMessage(conversationDesainKaos, 'askJenisKaos');
+        const initialMessage = getNextStepMessage(
+            conversationDesainKaos,
+            'askJenisKaos'
+        );
         await sendMessageWithDelay(client, chat, msg, initialMessage);
     } else if (msg.body.toLowerCase() === 'size order') {
         initializeUserState(userId, conversationSizeFitting);
         activateConversation(userId);
-        const initialMessage = getNextStepMessage(conversationSizeFitting, 'askOrderPO');
+        const initialMessage = getNextStepMessage(
+            conversationSizeFitting,
+            'askOrderPO'
+        );
         await sendMessageWithDelay(client, chat, msg, initialMessage);
     } else if (userState.active) {
         if (msg.body.toLowerCase() === 'exit') {
@@ -260,7 +319,12 @@ client.on('message', async (msg) => {
             initializeUserState(userId);
         } else {
             // Pass the userState.conversationType directly to handle steps based on the active conversation
-            await handleConversationStep(msg, userId, chat, userState.conversationType);
+            await handleConversationStep(
+                msg,
+                userId,
+                chat,
+                userState.conversationType
+            );
         }
     }
 });
