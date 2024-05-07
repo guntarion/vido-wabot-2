@@ -96,60 +96,60 @@ class Client extends EventEmitter {
 
         await this.authStrategy.beforeBrowserInitialized();
 
-        const puppeteerOpts = this.options.puppeteer;
-        if (puppeteerOpts && puppeteerOpts.browserWSEndpoint) {
-            browser = await puppeteer.connect(puppeteerOpts);
-            page = await browser.newPage();
-        } else {
-            const browserArgs = [...(puppeteerOpts.args || [])];
-            if(!browserArgs.find(arg => arg.includes('--user-agent'))) {
-                browserArgs.push(`--user-agent=${this.options.userAgent}`);
-            }
-            // navigator.webdriver fix
-            browserArgs.push('--disable-blink-features=AutomationControlled');
-
-            browser = await puppeteer.launch({...puppeteerOpts, executablePath: '/opt/homebrew/bin/chromium', args: browserArgs});
-            page = (await browser.pages())[0];
-        }
-
         // const puppeteerOpts = this.options.puppeteer;
         // if (puppeteerOpts && puppeteerOpts.browserWSEndpoint) {
-        //     // Connect to an existing browser instance
         //     browser = await puppeteer.connect(puppeteerOpts);
         //     page = await browser.newPage();
         // } else {
-        //     // Construct browser arguments with necessary defaults
         //     const browserArgs = [...(puppeteerOpts.args || [])];
-        //     if (!browserArgs.find(arg => arg.includes('--user-agent'))) {
+        //     if(!browserArgs.find(arg => arg.includes('--user-agent'))) {
         //         browserArgs.push(`--user-agent=${this.options.userAgent}`);
         //     }
-        //     // Add navigator.webdriver fix
+        //     // navigator.webdriver fix
         //     browserArgs.push('--disable-blink-features=AutomationControlled');
 
-        //     // Ensure headless mode is enabled and add sandbox security flags
-        //     const launchOptions = {
-        //         ...puppeteerOpts,
-        //         headless: true,  // Ensure Puppeteer runs in headless mode
-        //         args: [
-        //             ...browserArgs,
-        //             '--no-sandbox',              // Important for some cloud environments
-        //             '--disable-setuid-sandbox',  // Ditto above
-        //             '--disable-dev-shm-usage',   // Helps with limited /dev/shm in some environments
-        //             '--disable-accelerated-2d-canvas',  // Performance tuning
-        //             '--no-first-run',
-        //             '--no-zygote',
-        //             '--single-process',  // Necessary on some systems
-        //             '--disable-gpu'      // Helps in headless environments without a GPU
-        //         ],
-        //         // executablePath: '/opt/homebrew/bin/chromium'  // Mac
-        //         // executablePath: '/snap/bin/chromium'  // Digital Ocean
-        //         executablePath: process.env.CHROMIUM_PATH
-        //     };
-
-        //     // Launch a new browser instance
-        //     browser = await puppeteer.launch(launchOptions);
-        //     page = (await browser.pages())[0] || await browser.newPage();
+        //     browser = await puppeteer.launch({...puppeteerOpts, executablePath: '/opt/homebrew/bin/chromium', args: browserArgs});
+        //     page = (await browser.pages())[0];
         // }
+
+        const puppeteerOpts = this.options.puppeteer;
+        if (puppeteerOpts && puppeteerOpts.browserWSEndpoint) {
+            // Connect to an existing browser instance
+            browser = await puppeteer.connect(puppeteerOpts);
+            page = await browser.newPage();
+        } else {
+            // Construct browser arguments with necessary defaults
+            const browserArgs = [...(puppeteerOpts.args || [])];
+            if (!browserArgs.find(arg => arg.includes('--user-agent'))) {
+                browserArgs.push(`--user-agent=${this.options.userAgent}`);
+            }
+            // Add navigator.webdriver fix
+            browserArgs.push('--disable-blink-features=AutomationControlled');
+
+            // Ensure headless mode is enabled and add sandbox security flags
+            const launchOptions = {
+                ...puppeteerOpts,
+                headless: true,  // Ensure Puppeteer runs in headless mode
+                args: [
+                    ...browserArgs,
+                    '--no-sandbox',              // Important for some cloud environments
+                    '--disable-setuid-sandbox',  // Ditto above
+                    '--disable-dev-shm-usage',   // Helps with limited /dev/shm in some environments
+                    '--disable-accelerated-2d-canvas',  // Performance tuning
+                    '--no-first-run',
+                    '--no-zygote',
+                    '--single-process',  // Necessary on some systems
+                    '--disable-gpu'      // Helps in headless environments without a GPU
+                ],
+                // executablePath: '/opt/homebrew/bin/chromium'  // Mac
+                // executablePath: '/snap/bin/chromium'  // Digital Ocean
+                executablePath: process.env.CHROMIUM_PATH
+            };
+
+            // Launch a new browser instance
+            browser = await puppeteer.launch(launchOptions);
+            page = (await browser.pages())[0] || await browser.newPage();
+        }
 
         if (this.options.proxyAuthentication !== undefined) {
             await page.authenticate(this.options.proxyAuthentication);
