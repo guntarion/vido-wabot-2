@@ -18,12 +18,16 @@ const {
     generateDesainSablon,
     generateDesainKaos,
     generateResponseAsCS,
+    chatWithBot,
     generateSlogan,
     generateTestimonial,
     appendToGoogleSheet,
     googleAuth,
 } = require('./openaiService');
 const translate = require('../src/googletranslate/index.js');
+
+const userConversations = new Map();
+
 
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -133,6 +137,44 @@ client.on('message', async (msg) => {
                 );
             });
     }
+
+    else if (msg.body.toLowerCase() === 'quit') {
+        // Remove user from conversation map if they want to quit
+        userConversations.delete(msg.from);
+        msg.reply('Anda telah mengakhiri percakapan dengan bot cs.');
+    } else if (msg.body.toLowerCase().startsWith('chat ') || userConversations.has(msg.from)) {
+        // Handles both initiating and continuing a conversation
+        const userId = msg.from;
+        const prompt = msg.body.toLowerCase().startsWith('chat ') ? msg.body.slice(5).trim() : msg.body;
+
+        let conversation = userConversations.get(userId);
+        if (!conversation) {
+            // Initialize the conversation if this is the start
+            conversation = [
+                {
+                    role: 'system',
+                    content:
+                        'Anda adalah chatbot layanan pelanggan dari Vido Garment, perusahaan yang membuat seragam, yang diprogram untuk menangani pertanyaan dengan nada humoris dan santai. Tujuan utama Anda adalah untuk membantu pelanggan secara efisien sambil membuat mereka tersenyum. Anda dapat menggunakan plesetan, permainan kata, dan lelucon ringan. Pastikan humor Anda sopan dan tidak menyinggung, cocok untuk semua audiens. Saat merespons, tujuannya adalah untuk membantu namun juga menyisipkan humor yang ceria untuk meringankan suasana. Pertahankan nada yang ramah dan humoris tanpa mengabaikan keseriusan kekhawatiran pelanggan. Gunakan humor untuk meningkatkan interaksi tetapi tidak untuk mengalihkan dari pertanyaan atau kekhawatiran penting yang mungkin dimiliki pelanggan. Untuk pertanyaan di luar lingkup pembahasan seragam dan seputar pembuatannya, atau yang di luar lingkup industri konveksi, garment, tekstil, Anda menolak dengan halus.',
+                },
+            ];
+            userConversations.set(userId, conversation);
+        }
+
+        // Add the user's message to the conversation
+        conversation.push({ role: 'user', content: prompt });
+
+        chatWithBot(conversation).then(response => {
+            // Add the bot's response to the conversation
+            conversation.push({ role: 'assistant', content: response });
+
+            // Send the response text back to the user
+            msg.reply(response);
+        }).catch(error => {
+            console.error('OpenAI Error:', error);
+            msg.reply('Sorry, there was an error processing your request.');
+        });
+    }
+
     else if (msg.body.toLowerCase().startsWith('slogan ')) {
         const userRequirement = msg.body.slice(7);
         const requirement = await translate(userRequirement, {from: 'id', to: 'en',});

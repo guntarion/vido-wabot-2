@@ -33814,7 +33814,32 @@ body.dark {
   background: #4caf50;
 }
 
-
 .chat .sidebar .contacts ul li a .contact .message {
     font-size: 12px; /* Adjust this value as needed */
+}
+
+.chat {
+    display: flex;
+    height: 90vh;  /* Adjust based on your layout needs */
+}
+
+.sidebar, .content {
+    overflow-y: auto; /* Enables vertical scrolling if content overflows */
+}
+
+.sidebar {
+    width: 25%; /* Adjust width as necessary */
+    max-height: 90vh;  /* Adjust based on your layout needs */
+}
+
+.content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;  /* Ensures the content area has a fixed max height */
+}
+
+.message-content {
+    flex-grow: 1;
+    overflow-y: auto; /* Ensures messages within this can scroll */
 }

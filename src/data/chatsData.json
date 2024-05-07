@@ -159,5 +159,65 @@
         "time": "2024-04-01T12:00:00Z"
       }
     ]
+  },
+  {
+      "id": 5,
+      "name": "Apsari Riris",
+      "avatar": "img/avatar.png",
+      "lastonline": "2024-05-04T09:30:00Z",
+      "lastmessage": "Saya tertarik dengan penawaran sablon dan ingin tahu lebih banyak tentang jenis kain dan harga.",
+      "messages": [
+          {
+              "type": "client",
+              "content": "Halo, saya Apsari Riris dari Warung Pecel Bu Dhanik. Kami berencana membuat seragam kaos t-shirt dan tertarik dengan jasa Anda. Bisakah Anda beri informasi tentang pilihan sablon dan kain yang Anda tawarkan?",
+              "time": "2024-05-04T09:35:00Z"
+          },
+          {
+              "type": "me",
+              "content": "Selamat pagi, Bu Apsari! Terima kasih telah menghubungi kami. Untuk kaos t-shirt, kami menyediakan beberapa pilihan kain seperti katun combed, polyester, dan CVC (Cotton-Polyester Blend) yang sangat nyaman dipakai. Untuk sablon, kami menawarkan sablon digital, sablon plastisol, dan sablon rubber. Kira-kira, berapa banyak kaos yang akan dipesan?",
+              "time": "2024-05-04T09:40:00Z"
+          },
+          {
+              "type": "client",
+              "content": "Kami membutuhkan sekitar 100 kaos. Apa perbedaan utama antara sablon digital dengan plastisol dan rubber?",
+              "time": "2024-05-04T09:45:00Z"
+          },
+          {
+              "type": "me",
+              "content": "Untuk sablon digital, hasilnya sangat detail dengan warna yang cerah dan cocok untuk desain kompleks, tetapi lebih mahal. Sablon plastisol memberikan hasil yang sangat tahan lama dan elastis, cocok untuk produksi massal. Sablon rubber memiliki tekstur yang lebih lembut dan nyaman, bagus untuk desain sederhana dan tidak terlalu rumit. Berdasarkan kebutuhan Warung Pecel Bu Dhanik, kami sarankan menggunakan sablon plastisol untuk durabilitas yang baik.",
+              "time": "2024-05-04T09:50:00Z"
+          },
+          {
+              "type": "client",
+              "content": "Terima kasih atas informasinya. Bagaimana dengan harga per unit jika menggunakan kain katun combed dan sablon plastisol?",
+              "time": "2024-05-04T09:55:00Z"
+          },
+          {
+              "type": "me",
+              "content": "Untuk kain katun combed dengan sablon plastisol, harga per unitnya adalah Rp 75.000 untuk pemesanan 100 kaos. Harga sudah termasuk biaya desain dan persiapan sablon.",
+              "time": "2024-05-04T10:00:00Z"
+          },
+          {
+              "type": "client",
+              "content": "Apakah ada biaya tambahan lain yang perlu kami ketahui? Dan bagaimana prosedur pemesanannya?",
+              "time": "2024-05-04T10:05:00Z"
+          },
+          {
+              "type": "me",
+              "content": "Tidak ada biaya tambahan lain, Bu Apsari. Untuk prosedur pemesanan, Anda hanya perlu mengirimkan desain kaos yang diinginkan. Kami akan membuatkan mockup desain untuk disetujui sebelum proses produksi dimulai. Setelah desain disetujui, kami akan membutuhkan pembayaran DP sebesar 50%, dan sisanya dibayar setelah kaos selesai diproduksi dan siap dikirim.",
+              "time": "2024-05-04T10:10:00Z"
+          },
+          {
+              "type": "client",
+              "content": "Baik, saya akan mengumpulkan desain dari tim kami dan mengirimkannya kepada Anda. Terima kasih atas bantuan dan informasi yang sangat jelas!",
+              "time": "2024-05-04T10:15:00Z"
+          },
+          {
+              "type": "me",
+              "content": "Sama-sama, Bu Apsari. Kami menantikan desain dari Warung Pecel Bu Dhanik dan siap membantu Anda. Jika ada pertanyaan lain, jangan ragu untuk menghubungi kami kembali.",
+              "time": "2024-05-04T10:20:00Z"
+          }
+      ]
   }
+
 ]

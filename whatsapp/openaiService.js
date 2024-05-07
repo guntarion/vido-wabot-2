@@ -44,6 +44,20 @@ async function generateResponseAsCS(prompt) {
     }
 }
 
+async function chatWithBot(conversation) {
+    try {
+        const response = await openai.chat.completions.create({
+            model: 'gpt-3.5-turbo',
+            messages: conversation, // Pass the whole conversation context
+        });
+
+        return response.choices[0].message.content.trim();
+    } catch (error) {
+        console.error('OpenAI Error:', error);
+        throw new Error('An error occurred while processing your request.');
+    }
+}
+
 async function generateLogoBordir(requirement) {
     const myPrompt =
         'Create a professional-looking logo design, in one image, depicting: ' +
@@ -200,6 +214,7 @@ async function appendToGoogleSheet(auth, range, data) {
 
 module.exports = {
     generateResponseAsCS,
+    chatWithBot,
     generateLogoBordir,
     generateDesainSablon,
     generateSlogan,

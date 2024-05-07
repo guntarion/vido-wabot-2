@@ -35,8 +35,12 @@ router.get('/datachat', (req, res) => {
     res.render('datachat', { title: 'Data Chat' });
 });
 
-router.get('/broadcast', (req, res) => {
+router.get('/send-broadcast', (req, res) => {
     res.render('broadcast', { title: 'Kirim Pesan' });
+});
+
+router.get('/send-individual', (req, res) => {
+    res.render('send-individual', { title: 'Kirim Pesan' });
 });
 
 router.get('/prospek', (req, res) => {

@@ -129,64 +129,64 @@ if (getResponseRecommendationButton) {
         });
 }
 
-// Berlaku untuk page Kirim Pesan
-document.addEventListener('DOMContentLoaded', function () {
-    const updateSelectedList = () => {
-        const selectedList = document.getElementById('selectedPersonsList');
-        selectedList.innerHTML = ''; // Clear the list
-        const checkboxes = document.querySelectorAll('.select-checkbox:checked');
-        checkboxes.forEach((checkbox, index) => {
-            const name = checkbox.getAttribute('data-name');
-            const listItem = document.createElement('li');
-            listItem.textContent = `${index + 1}. ${name}`; // Create list item with the name
-            selectedList.appendChild(listItem); // Add the list item to the list
-        });
-    };
+// // Berlaku untuk page Kirim Pesan
+// document.addEventListener('DOMContentLoaded', function () {
+//     const updateSelectedList = () => {
+//         const selectedList = document.getElementById('selectedPersonsList');
+//         selectedList.innerHTML = ''; // Clear the list
+//         const checkboxes = document.querySelectorAll('.select-checkbox:checked');
+//         checkboxes.forEach((checkbox, index) => {
+//             const name = checkbox.getAttribute('data-name');
+//             const listItem = document.createElement('li');
+//             listItem.textContent = `${index + 1}. ${name}`; // Create list item with the name
+//             selectedList.appendChild(listItem); // Add the list item to the list
+//         });
+//     };
 
-    // Event listener for checkboxes
-    const checkboxes = document.querySelectorAll('.select-checkbox');
-    if (checkboxes) {
-        checkboxes.forEach((checkbox) => {
-            checkbox.addEventListener('change', updateSelectedList);
-        });
-    }
+//     // Event listener for checkboxes
+//     const checkboxes = document.querySelectorAll('.select-checkbox');
+//     if (checkboxes) {
+//         checkboxes.forEach((checkbox) => {
+//             checkbox.addEventListener('change', updateSelectedList);
+//         });
+//     }
 
-    // Sending messages when button is clicked
-    const sendMessagesBtn = document.getElementById('sendMessagesBtn');
-    if (sendMessagesBtn) {
-        sendMessagesBtn.addEventListener('click', function () {
-            const selectedUsers = [];
-            document.querySelectorAll('.select-checkbox:checked').forEach((checkbox) => {
-                selectedUsers.push({
-                    name: checkbox.getAttribute('data-name'),
-                    number: checkbox.getAttribute('data-number'),
-                });
-            });
+//     // Sending messages when button is clicked
+//     const sendMessagesBtn = document.getElementById('sendMessagesBtn');
+//     if (sendMessagesBtn) {
+//         sendMessagesBtn.addEventListener('click', function () {
+//             const selectedUsers = [];
+//             document.querySelectorAll('.select-checkbox:checked').forEach((checkbox) => {
+//                 selectedUsers.push({
+//                     name: checkbox.getAttribute('data-name'),
+//                     number: checkbox.getAttribute('data-number'),
+//                 });
+//             });
 
-            // Get the content of the message from the textarea
-            const messageContent = document.getElementById('konten-dikirim').value;
+//             // Get the content of the message from the textarea
+//             const messageContent = document.getElementById('konten-dikirim').value;
 
-            // Log selected users or send this data to your server/API for further processing
-            console.log('%c Selected users', 'color: green', selectedUsers);
+//             // Log selected users or send this data to your server/API for further processing
+//             console.log('%c Selected users', 'color: green', selectedUsers);
 
-            // Example: Post to a server endpoint
-            const numbers = selectedUsers.map(user => user.number);
-            fetch('http://localhost:3002/api/send-messages', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    numbers: numbers,
-                    text: messageContent,
-                }),
-            })
-                .then((response) => response.json())
-                .then((data) => console.log(data))
-                .catch((error) => console.error('Error:', error));
-        });
-    }
-});
+//             // Example: Post to a server endpoint
+//             const numbers = selectedUsers.map(user => user.number);
+//             fetch('http://localhost:3002/api/send-messages', {
+//                 method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                 },
+//                 body: JSON.stringify({
+//                     numbers: numbers,
+//                     text: messageContent,
+//                 }),
+//             })
+//                 .then((response) => response.json())
+//                 .then((data) => console.log(data))
+//                 .catch((error) => console.error('Error:', error));
+//         });
+//     }
+// });
 
 /*
 // Testing sending a single message
@@ -231,39 +231,39 @@ document.getElementById('sendMessagesBtn').addEventListener('click', function() 
 */
 
 
-document.getElementById('improve-pesan').addEventListener('click', function () {
-    // Get the values from the inputs
-    const previousMessage = document.getElementById('previous-message').value;
-    const userDraft = document.getElementById('user-draft').value;
-    const userInstruction = document.getElementById('user-instruction').value;
-    const useEmoji = document.getElementById('use-emoji').checked;
+// document.getElementById('improve-pesan').addEventListener('click', function () {
+//     // Get the values from the inputs
+//     const previousMessage = document.getElementById('previous-message').value;
+//     const userDraft = document.getElementById('user-draft').value;
+//     const userInstruction = document.getElementById('user-instruction').value;
+//     const useEmoji = document.getElementById('use-emoji').checked;
 
-    // Show the spinner
-    document.querySelector('.css3-spinner').style.display = 'block';
+//     // Show the spinner
+//     document.querySelector('.css3-spinner').style.display = 'block';
 
-    // Fetch data from the OpenAI API
-    fetch('/api/openai-improvement-pesan', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            userDraft: userDraft,
-            previousMessage: previousMessage,
-            userInstruction: userInstruction,
-            useEmoji: useEmoji,
-        }),
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            // Hide the spinner
-            document.querySelector('.css3-spinner').style.display = 'none';
-            // Put the result in the 'konten-dikirim' textarea
-            document.getElementById('konten-dikirim').value = data.message;
-        })
-        .catch((error) => {
-            // Hide the spinner in case of error
-            document.querySelector('.css3-spinner').style.display ='none';
-            console.error('Error:', error);
-        });
-});
+//     // Fetch data from the OpenAI API
+//     fetch('/api/openai-improvement-pesan', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//             userDraft: userDraft,
+//             previousMessage: previousMessage,
+//             userInstruction: userInstruction,
+//             useEmoji: useEmoji,
+//         }),
+//     })
+//         .then((response) => response.json())
+//         .then((data) => {
+//             // Hide the spinner
+//             document.querySelector('.css3-spinner').style.display = 'none';
+//             // Put the result in the 'konten-dikirim' textarea
+//             document.getElementById('konten-dikirim').value = data.message;
+//         })
+//         .catch((error) => {
+//             // Hide the spinner in case of error
+//             document.querySelector('.css3-spinner').style.display ='none';
+//             console.error('Error:', error);
+//         });
+// });
