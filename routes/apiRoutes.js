@@ -59,7 +59,7 @@ but instead of rendering a view, it sends the parsed data as a JSON response.
 This is an API endpoint that can be used by client-side JavaScript or other clients to fetch the chat data.
 */
 router.get('/chats', (req, res) => {
-    const chatsPath = path.join(__dirname, '../src/chatsData.json');
+    const chatsPath = path.join(__dirname, '../src/data/chatsData.json');
     // console.log('chatsPath =====', chatsPath);
     fs.readFile(chatsPath, 'utf8', (err, data) => {
         if (err) {

@@ -12,8 +12,8 @@ router.get('/', (req, res) => {
 This route reads the chatsData.json file, parses the JSON data, and then renders the 'chats' view with the parsed data. 
 This is used to display the chat data on a webpage.
 */
-router.get('/chats', (req, res) => {
-    const chatsPath = path.join(__dirname, '../src/chatsData.json');
+router.get('/chat-individual', (req, res) => {
+    const chatsPath = path.join(__dirname, '../src/data/chatsData.json');
     fs.readFile(chatsPath, 'utf8', async (err, data) => {
         if (err) {
             console.error(err);
@@ -35,13 +35,22 @@ router.get('/datachat', (req, res) => {
     res.render('datachat', { title: 'Data Chat' });
 });
 
+router.get('/broadcast', (req, res) => {
+    res.render('broadcast', { title: 'Kirim Pesan' });
+});
+
 router.get('/prospek', (req, res) => {
     res.render('prospek-usaha', { title: 'Prospek Usaha' });
 });
 
-router.get('/broadcast', (req, res) => {
-    res.render('broadcast', { title: 'Kirim Pesan' });
+router.get('/kompetitor', (req, res) => {
+    res.render('kompetitor-usaha', { title: 'Kompetitor Usaha' });
 });
+
+router.get('/kompetitor-detail', (req, res) => {
+    res.render('kompetitor-detail', { title: 'Detail Kompetitor' }); // No leading slash
+});
+
 
 router.get('/forms', (req, res) => {
     res.render('forms', { title: 'Forms' });
