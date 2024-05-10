@@ -1,5 +1,5 @@
-const getContentButton = document.getElementById('get-content');
-const getResponseRecommendationButton = document.getElementById('response-recommendation');
+// const getContentButton = document.getElementById('get-content');
+// const getResponseRecommendationButton = document.getElementById('response-recommendation');
 
 
 fetch('/api/data') // Replace '/api/data' with the URL of your API
@@ -63,6 +63,7 @@ function displayChatMessages(chat) {
     chatMessages.innerHTML = messagesHtml;
 }
 
+/*
 if (getContentButton) {
     document.getElementById('get-content').addEventListener('click', function () {
         const chatMessages = document.getElementById('chat-messages');
@@ -91,7 +92,9 @@ if (getContentButton) {
     });
 }
 
+
 // On chat page, when the response recommendation button is clicked
+
 if (getResponseRecommendationButton) {
     document
         .getElementById('response-recommendation')
@@ -128,6 +131,7 @@ if (getResponseRecommendationButton) {
                 });
         });
 }
+*/
 
 // // Berlaku untuk page Kirim Pesan
 // document.addEventListener('DOMContentLoaded', function () {

@@ -30,8 +30,6 @@ function initializeUserState(userId, conversationType = null) {
     console.log(`Initialized state for ${userId}: `, userStates[userId]);
 }
 
-
-
 function activateConversation(userId) {
     if (userStates[userId]) {
         userStates[userId].active = true;

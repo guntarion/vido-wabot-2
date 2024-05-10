@@ -64,20 +64,32 @@
 </div>
 
 <div class="form-group">
-   
+
+
+
    <br>
    <div class="col-12">
-      <button id="get-content" type="button" name="openai-submit" class="btn btn-secondary">Get Content</button>
+      <button id="get-content" type="button" name="get-content" class="btn btn-secondary" style="display: none;">Get Content</button>
    </div>
    
-   <div id="chat-content"></div>
-   <div id="last-sender"></div>
+   <!-- Hidden elements -->
+   <div id="chat-content" style="display: none;"></div>
+   <div id="last-sender" style="display: none;"></div>
 
-   <br>
-   <label>Content Recommendation:</label>
 
    <div class="col-12">
-      <button id="response-recommendation" type="button" name="response-recommendation" class="btn btn-secondary">Get Recommendation</button>
+      <button id="get-summary" type="button" name="get-summary" class="btn btn-secondary">Get Summary</button>
+   </div>
+   <br>
+   <textarea name="chat-summary" id="chat-summary" class="form-control required" cols="30" rows="5" disabled></textarea>
+
+
+
+   <br>
+   {{!-- <label>Response Recommendation:</label> --}}
+
+   <div class="col-12">
+      <button id="response-recommendation" type="button" name="response-recommendation" class="btn btn-secondary">Get Response Recommendation</button>
    </div>
    <br>
    <div class="css3-spinner" style="--cnvs-loader-color:var(--cnvs-themecolor); display: none;">
@@ -91,3 +103,117 @@
    <textarea name="openai-output" id="openai-output" class="form-control required" cols="30" rows="5">{{message}}</textarea>
 </div>
 
+<script>
+
+document
+.getElementById('get-summary')
+.addEventListener('click', function () {
+   const chatMessages = document.getElementById('chat-messages');
+   const chatContent = document.getElementById('chat-content');
+   const lastSender = document.getElementById('last-sender');
+
+   // Get the text content and type of all .message elements within #chat-messages
+   const messages = Array.from(chatMessages.querySelectorAll('.message')).map(
+      (message) => {
+         const content = message.querySelector('.bubble').textContent;
+         const type = message.classList.contains('me') ? 'CS' : 'Clients';
+         return { type, content };
+      }
+   );
+
+   // Join the messages into a single string with line breaks between each message
+   const messagesText = messages
+      .map((message) => `${message.type}: ${message.content}`)
+      .join('\n');
+
+   // Insert the messages into #chat-content
+   chatContent.textContent = messagesText;
+
+   // Insert the type of the last message into #last-sender
+   lastSender.textContent = messages[messages.length - 1].type;
+
+   // console.log('chatContent:', chatContent.textContent);
+
+   // Show the spinner
+   document.querySelector('.css3-spinner').style.display = 'block';
+
+   fetch('/api/openai-chat-summary', {
+         method: 'POST',
+         headers: {
+            'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({ chatContent: chatContent.textContent, lastSender: lastSender.textContent }),
+   })
+         .then((response) => response.json())
+         .then((data) => {
+            // Hide the spinner
+            document.querySelector('.css3-spinner').style.display =  'none';
+            document.getElementById('chat-summary').value = data.message;
+         })
+         .catch((error) => {
+            // Hide the spinner in case of error
+            document.querySelector('.css3-spinner').style.display ='none';
+            console.error('Error:', error);
+         });
+});
+
+
+
+document
+   .getElementById('response-recommendation')
+   .addEventListener('click', function () {
+      const chatMessages = document.getElementById('chat-messages');
+      const chatContent = document.getElementById('chat-content');
+      const lastSender = document.getElementById('last-sender');
+
+      // Get the text content and type of all .message elements within #chat-messages
+      const messages = Array.from(chatMessages.querySelectorAll('.message')).map(
+         (message) => {
+            const content = message.querySelector('.bubble').textContent;
+            const type = message.classList.contains('me') ? 'CS' : 'Clients';
+            return { type, content };
+         }
+      );
+
+      // Join the messages into a single string with line breaks between each message
+      const messagesText = messages
+         .map((message) => `${message.type}: ${message.content}`)
+         .join('\n');
+
+      // Insert the messages into #chat-content
+      chatContent.textContent = messagesText;
+
+      // Insert the type of the last message into #last-sender
+      lastSender.textContent = messages[messages.length - 1].type;
+
+      console.log('chatContent:', chatContent.textContent);
+
+      // Show the spinner
+      document.querySelector('.css3-spinner').style.display = 'block';
+
+      fetch('/api/openai-response-recommendation', {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ chatContent: chatContent.textContent, lastSender: lastSender.textContent }),
+      })
+            .then((response) => response.json())
+            .then((data) => {
+               // Hide the spinner
+               document.querySelector('.css3-spinner').style.display =
+                  'none';
+
+               document.getElementById('openai-output').value =
+                  data.message;
+            })
+            .catch((error) => {
+               // Hide the spinner in case of error
+               document.querySelector('.css3-spinner').style.display ='none';
+               console.error('Error:', error);
+            });
+   });
+
+
+
+</script>

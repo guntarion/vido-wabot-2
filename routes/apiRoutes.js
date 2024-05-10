@@ -74,6 +74,26 @@ router.get('/chats', (req, res) => {
     });
 });
 
+// OpenAI API route for chats page - summary respon berdasarkan history chat
+router.post('/openai-chat-summary', async (req, res) => {
+    const { chatContent, lastSender } = req.body;
+
+    const completion = await openai.chat.completions.create({
+        messages: [
+            {
+                role: 'system',
+                content:
+                    'Berdasarkan rekaman teks hasil pembicaraan chat antara customer service dengan klien atau calon klien, buatlah ringkasan yang jelas dan padat. Ringkasan ini dimaksudkan untuk digunakan oleh supervisor dari agen customer service untuk memahami status terakhir dari setiap prospek atau klien. Pastikan untuk mencakup poin-poin utama seperti: 1. Identitas Klien/Calon Klien: Sebutkan nama dan detail relevan lainnya tentang klien atau calon klien. 2. Tujuan Pembicaraan: Jelaskan secara singkat tujuan utama dari pembicaraan tersebut, misalnya permintaan informasi produk, keluhan, atau permintaan layanan. 3. Isu Utama yang Dibahas: Ringkaskan isu-isu utama yang dibahas selama chat, termasuk pertanyaan yang diajukan oleh klien atau calon klien dan jawaban yang diberikan oleh customer service. 4. Status Terakhir: Berikan detail tentang status terakhir dari interaksi tersebut, termasuk setiap tindak lanjut yang telah dijanjikan atau masalah yang masih belum terselesaikan. 5. Tindakan yang Direkomendasikan: Sertakan rekomendasi tindakan selanjutnya yang perlu diambil oleh customer service atau departemen lain yang terkait, berdasarkan isi pembicaraan. Berikut adalah rekaman chat yang perlu diringkas: ' + chatContent,
+            },
+        ],
+        model: 'gpt-3.5-turbo',
+    });
+
+    const isiRespon = completion.choices[0].message.content + '\n\nYang terakhir berbicara adalah: ' + lastSender;
+
+    res.json({ message: isiRespon });
+});
+
 // OpenAI API route for chats page - rekomendasi respon berdasarkan history chat
 router.post('/openai-response-recommendation', async (req, res) => {
     const { chatContent, lastSender } = req.body;

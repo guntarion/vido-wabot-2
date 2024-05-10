@@ -1,6 +1,3 @@
-const getContentButton = document.getElementById('get-content');
-const getResponseRecommendationButton = document.getElementById('response-recommendation');
-
 
 fetch('/api/data') // Replace '/api/data' with the URL of your API
     .then((response) => response.json())
@@ -63,68 +60,3 @@ function displayChatMessages(chat) {
     chatMessages.innerHTML = messagesHtml;
 }
 
-if (getContentButton) {
-    document.getElementById('get-content').addEventListener('click', function () {
-        const chatMessages = document.getElementById('chat-messages');
-        const chatContent = document.getElementById('chat-content');
-        const lastSender = document.getElementById('last-sender');
-
-        // Get the text content and type of all .message elements within #chat-messages
-        const messages = Array.from(chatMessages.querySelectorAll('.message')).map(
-            (message) => {
-                const content = message.querySelector('.bubble').textContent;
-                const type = message.classList.contains('me') ? 'CS' : 'Clients';
-                return { type, content };
-            }
-        );
-
-        // Join the messages into a single string with line breaks between each message
-        const messagesText = messages
-            .map((message) => `${message.type}: ${message.content}`)
-            .join('\n');
-
-        // Insert the messages into #chat-content
-        chatContent.textContent = messagesText;
-
-        // Insert the type of the last message into #last-sender
-        lastSender.textContent = messages[messages.length - 1].type;
-    });
-}
-
-// On chat page, when the response recommendation button is clicked
-if (getResponseRecommendationButton) {
-    document
-        .getElementById('response-recommendation')
-        .addEventListener('click', function () {
-            const chatContent =
-                document.getElementById('chat-content').textContent;
-            const lastSender =
-                document.getElementById('last-sender').textContent;
-            console.log('chatContent:', chatContent);
-
-            // Show the spinner
-            document.querySelector('.css3-spinner').style.display = 'block';
-
-            fetch('/api/openai-response-recommendation', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ chatContent, lastSender }),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    // Hide the spinner
-                    document.querySelector('.css3-spinner').style.display =
-                        'none';
-
-                    document.getElementById('openai-output').value =
-                        data.message;
-                })
-                .catch((error) => {
-                    // Hide the spinner in case of error
-                    document.querySelector('.css3-spinner').style.display ='none';
-                    console.error('Error:', error);
-                });
-        });
-}
