@@ -23,6 +23,80 @@
 const OpenAI = require('openai');
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
+// Function to describe an image using OpenAI Vision API
+async function describeImageWithBase64(imageBase64) {
+    try {
+        // Read the image file and convert to base64
+        // const imageBuffer = fs.readFileSync(imagePath);
+        // const imageBase64 = imageBuffer.toString('base64');
+
+        // Create the payload for the API request
+        const payload = {
+            model: 'gpt-4-vision-preview',
+            messages: [
+                {
+                    role: 'system',
+                    content:
+                        'User will give you a picture of a shirt, or a person using a shirt. Please focus on the shirt, completely ignore the person; describe the shirt and suggest, in what occasion it can be worn.',
+                },
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'image_base64',
+                            content: `data:image/jpeg;base64,${imageBase64}`,
+                        },
+                    ],
+                },
+            ],
+            max_tokens: 1000,
+        };
+
+        // Send the request to OpenAI API
+        const response = await openai.chat.completions.create(payload);
+
+        // Log the response from the API
+        console.log('Description:', response.choices[0].message.content);
+        return response.choices[0].message.content;
+    } catch (error) {
+        console.error('Error describing the image:', error);
+    }
+}
+
+async function describeImageWithUrl(imageUrl) {
+    try {
+        // Create the payload for the API request
+        const payload = {
+            model: 'gpt-4-vision-preview',
+            messages: [
+                {
+                    role: 'system',
+                    content: 'User will give you a picture of a shirt, or a person using a shirt. Please focus on the shirt, completely ignore the person; describe the shirt and suggest, in what occasion it can be worn.',
+                },
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'image_url',
+                            image_url: imageUrl,
+                        },
+                    ],
+                },
+            ],
+            max_tokens: 1000,
+        };
+
+        // Send the request to OpenAI API
+        const response = await openai.chat.completions.create(payload);
+
+        // Log the response from the API
+        console.log('Description:', response.choices[0].message.content);
+        return response.choices[0].message.content;
+    } catch (error) {
+        console.error('Error describing the image:', error);
+    }
+}
+
 async function generateResponseAsCS(prompt) {
     try {
         const response = await openai.chat.completions.create({
@@ -221,5 +295,7 @@ module.exports = {
     generateDesainKaos,
     generateTestimonial,
     appendToGoogleSheet,
+    describeImageWithBase64,
+    describeImageWithUrl,
     googleAuth,
 };

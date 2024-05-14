@@ -22,8 +22,12 @@ const {
     generateSlogan,
     generateTestimonial,
     appendToGoogleSheet,
+    // describeImageWithBase64,
+    describeImageWithUrl,
     googleAuth,
 } = require('./openaiService');
+const { watermarkingImageUploadToGDrive, uploadImage } = require('./googleImageService');
+
 const translate = require('../src/googletranslate/index.js');
 
 const userConversations = new Map();
@@ -61,6 +65,7 @@ client.on('message', async (msg) => {
     console.log('MESSAGE RECEIVED', msg);
     const chat = await msg.getChat();
     const sender = await msg.getContact();
+    console.log(`Sender: ${sender.pushname}, Number: ${sender.number}`);
     const userId = sender.number;
 
     const userState = getUserState(userId);
@@ -89,6 +94,60 @@ client.on('message', async (msg) => {
         const text = msg.body.slice(9);
         msg.reply(text, null, { linkPreview: true });   
     }
+
+    /*
+    else if (msg.hasMedia) {
+        if (sender.number == '62817309143') {
+            console.log('Received media from Guntar');
+            const media = await msg.downloadMedia();
+            const base64data = media.data.toString('base64');
+            describeImageWithBase64(base64data)
+                .then((response) => {
+                    // Send the response text back to the user
+                    msg.reply(response);
+                })
+                .catch((error) => {
+                    console.error('OpenAI Error:', error);
+                    msg.reply('Mohon maaf, terjadi error saat memproses request Anda.', error);
+                });
+        }
+    }
+    */
+
+    else if (msg.body.startsWith('inigimana ')) {
+        const link_gambar = msg.body.slice(10);
+        describeImageWithUrl(link_gambar)
+            .then((response) => {
+                // Send the response text back to the user
+                msg.reply(response);
+            })
+            .catch((error) => {
+                console.error('OpenAI Error:', error);
+                msg.reply(
+                    'Mohon maaf, terjadi error saat memproses request Anda.',
+                    error
+                );
+            });
+
+    }
+
+    else if (msg.body.startsWith('img ')) {
+        const link_gambar = msg.body.slice(4);
+        watermarkingImageUploadToGDrive(link_gambar)
+            .then((response) => {
+                // Send the response text back to the user
+                msg.reply(response);
+            })
+            .catch((error) => {
+                console.error('OpenAI Error:', error);
+                msg.reply(
+                    'Mohon maaf, terjadi error saat memproses request Anda.',
+                    error
+                );
+            });
+
+    }
+
 
     else if (msg.body === '!chats') {
         const chats = await client.getChats();
@@ -274,16 +333,22 @@ client.on('message', async (msg) => {
             'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk meng-generate desain sablon Anda 😊'
         );
         generateDesainSablon(requirement.text)
-            .then(async (imageUrl) => {
-                // console.log('Image URL:', imageUrl);
-                const media = await MessageMedia.fromUrl(imageUrl);
-                // console.log('Media:', media);
-
-                // Send the image as an attachment
+            .then((imageUrl) => {
+                // Use the generated image URL to add a watermark and upload to Google Drive
+                console.log('Image URL:', imageUrl);
+                return watermarkingImageUploadToGDrive(imageUrl);
+            })
+            .then(async ({ url, mimeType }) => {
+                // Create media from the watermarked image URL
+                const media = await MessageMedia.fromUrl(url, {
+                    unsafeMime: true,
+                    mimeType: mimeType,
+                });
+                // Send the watermarked image as an attachment
                 await client.sendMessage(msg.from, media);
             })
             .catch((error) => {
-                console.error('OpenAI Error:', error);
+                console.error('Error:', error);
                 msg.reply(
                     'Sorry, I encountered an error while processing your request.'
                 );

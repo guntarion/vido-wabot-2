@@ -11,7 +11,7 @@ const viewRoutes = require('../routes/viewRoutes');
 const apiRoutes = require('../routes/apiRoutes');
 
 const app = express();
-const port = process.env.PORT || 3002;
+const port = process.env.PORT || 3000;
 
 // Body parser middleware
 app.use(bodyParser.json());
