@@ -305,16 +305,22 @@ client.on('message', async (msg) => {
             'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk generate logo Anda 😊'
         );
         generateLogoBordir(requirement.text)
-            .then(async (imageUrl) => {
-                // console.log('Image URL:', imageUrl);
-                const media = await MessageMedia.fromUrl(imageUrl);
-                // console.log('Media:', media);
-
-                // Send the image as an attachment
+            .then((imageUrl) => {
+                // Use the generated image URL to add a watermark and upload to Google Drive
+                console.log('Image URL:', imageUrl);
+                return watermarkingImageUploadToGDrive(imageUrl);
+            })
+            .then(async ({ url, mimeType }) => {
+                // Create media from the watermarked image URL
+                const media = await MessageMedia.fromUrl(url, {
+                    unsafeMime: true,
+                    mimeType: mimeType,
+                });
+                // Send the watermarked image as an attachment
                 await client.sendMessage(msg.from, media);
             })
             .catch((error) => {
-                console.error('OpenAI Error:', error);
+                console.error('Error:', error);
                 msg.reply(
                     'Sorry, I encountered an error while processing your request.'
                 );
@@ -455,12 +461,19 @@ async function processFinalStep(msg, userId, chat, conversationType) {
         const desainKaosPrompt = await suggestDesainKaos(responses);
         // Generate the design image from the prompt
         generateDesainKaos(desainKaosPrompt)
-            .then(async (imageUrl) => {
+            .then((imageUrl) => {
+                // Use the generated image URL to add a watermark and upload to Google Drive
                 console.log('Design Image URL:', imageUrl);
-                const media = await MessageMedia.fromUrl(imageUrl);
+                return watermarkingImageUploadToGDrive(imageUrl);
+            })
+            .then(async ({ url, mimeType }) => {
+                // Create media from the watermarked image URL
+                const media = await MessageMedia.fromUrl(url, {
+                    unsafeMime: true,
+                    mimeType: mimeType,
+                });
                 console.log('Media:', media);
-                // Send the image as an attachment
-                // await client.sendMessage(msg.from, media, { caption: desainKaosPrompt });
+                // Send the watermarked image as an attachment
                 await client.sendMessage(msg.from, media, { caption: 'Berikut mockup desain untuk Anda, dari Vido AI' });
             })
             .catch(async (error) => {  // Note the async keyword here
