@@ -22,13 +22,15 @@ const {
     generateSlogan,
     generateTestimonial,
     appendToGoogleSheet,
-    // describeImageWithBase64,
-    // describeImageWithUrl,
     suggestSuitableOccasionOfShirt,
     suggestDesignFromLogo,
+    suggestDesignFromLogoBase64Input,
+    suggestSuitableOccasionOfShirtBase64Input,
     googleAuth,
 } = require('./openaiService');
-const watermarkingImageUploadToGDrive = require('./googleImageService');
+const { watermarkingImageUploadToGDrive, 
+    uploadBase64ToGoogleDrive,
+} = require('./googleImageService');
 
 const translate = require('../src/googletranslate/index.js');
 
@@ -97,24 +99,25 @@ client.on('message', async (msg) => {
         msg.reply(text, null, { linkPreview: true });   
     }
 
-    /*
-    else if (msg.hasMedia) {
-        if (sender.number == '62817309143') {
-            console.log('Received media from Guntar');
-            const media = await msg.downloadMedia();
-            const base64data = media.data.toString('base64');
-            describeImageWithBase64(base64data)
-                .then((response) => {
-                    // Send the response text back to the user
-                    msg.reply(response);
-                })
-                .catch((error) => {
-                    console.error('OpenAI Error:', error);
-                    msg.reply('Mohon maaf, terjadi error saat memproses request Anda.', error);
-                });
-        }
+    else if (msg.hasMedia && msg.body === 'tes') {
+        console.log('Received media from Guntar');
+        const media = await msg.downloadMedia();
+        // const base64data = media.data.toString('base64');
+        const base64data = media.data;
+
+        uploadBase64ToGoogleDrive(base64data, 'media.jpg')
+            .then((response) => {
+                // Send the response text back to the user
+                msg.reply(response);
+            })
+            .catch((error) => {
+                console.error('Upload Error:', error);
+                msg.reply(
+                    'Mohon maaf, terjadi error saat upload file.',
+                    error
+                );
+            });
     }
-    */
 
     else if (msg.body.startsWith('pasuntuk ')) {
         const link_gambar = msg.body.slice(9);
@@ -131,6 +134,25 @@ client.on('message', async (msg) => {
             });
     }
 
+    // with base64 (media is in the message)
+    else if (msg.hasMedia && msg.body === 'pasuntuk') {
+        const media = await msg.downloadMedia();
+        const base64data = media.data.toString('base64');
+
+        suggestSuitableOccasionOfShirtBase64Input(base64data)
+            .then((response) => {
+                msg.reply(response);
+            })
+            .catch((error) => {
+                console.error('OpenAI Error:', error);
+                msg.reply(
+                    'Mohon maaf, terjadi error saat memproses request Anda.',
+                    error
+                );
+            });
+    }
+
+    // with url
     else if (msg.body.startsWith('idedesain ')) {
         const link_gambar = msg.body.slice(10);
         suggestDesignFromLogo(link_gambar)
@@ -146,7 +168,23 @@ client.on('message', async (msg) => {
             });
     }
 
-    else if (msg.body.startsWith('img ')) {
+    // with base64 (media is in the message)
+    else if (msg.hasMedia && msg.body === 'idedesain') {
+        const media = await msg.downloadMedia();
+        const base64data = media.data.toString('base64');
+
+        suggestDesignFromLogoBase64Input(base64data)
+            .then((response) => {
+                msg.reply(response);
+            })
+            .catch((error) => {
+                console.error('OpenAI Error:', error);
+                msg.reply(
+                    'Mohon maaf, terjadi error saat memproses request Anda.',
+                    error
+                );
+            });
+    } else if (msg.body.startsWith('img ')) {
         const link_gambar = msg.body.slice(4);
         watermarkingImageUploadToGDrive(link_gambar)
             .then((response) => {
@@ -160,11 +198,7 @@ client.on('message', async (msg) => {
                     error
                 );
             });
-
-    }
-
-
-    else if (msg.body === '!chats') {
+    } else if (msg.body === '!chats') {
         const chats = await client.getChats();
         console.log(chats); // to see the content in the console
 
@@ -177,9 +211,7 @@ client.on('message', async (msg) => {
             }
         });
         client.sendMessage(msg.from, `The bot has ${chats.length} chats open.`);
-    }
-
-    else if (msg.body.startsWith('sizereg ')) {
+    } else if (msg.body.startsWith('sizereg ')) {
         chat.sendSeen();
         const isiRegistrasiSize = msg.body.slice(8);
         const parts = isiRegistrasiSize.split(' ');
@@ -188,7 +220,15 @@ client.on('message', async (msg) => {
         const name = parts[2].toUpperCase();
         let info = client.info;
         const now = new Date();
-        const formattedDateTime = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        const formattedDateTime = `${now.getFullYear()}-${(now.getMonth() + 1)
+            .toString()
+            .padStart(2, '0')}-${now
+            .getDate()
+            .toString()
+            .padStart(2, '0')} ${now
+            .getHours()
+            .toString()
+            .padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
         const sender = await msg.getContact();
         const data = {
             dateTime: formattedDateTime,
@@ -203,10 +243,12 @@ client.on('message', async (msg) => {
         chat.sendSeen();
         msg.react('📝');
         await appendToGoogleSheet(googleAuth, 'entriSize', data);
-        await replyWithDelay(chat, msg, 'Terima kasih. Entri size Anda kami catat.');
-    } 
-
-    else if (msg.body.toLowerCase().startsWith('askcs1 ')) {
+        await replyWithDelay(
+            chat,
+            msg,
+            'Terima kasih. Entri size Anda kami catat.'
+        );
+    } else if (msg.body.toLowerCase().startsWith('askcs1 ')) {
         const prompt = msg.body.slice(7);
         chat.sendSeen();
         generateResponseAsCS(prompt)
@@ -221,9 +263,7 @@ client.on('message', async (msg) => {
                     error
                 );
             });
-    }
-
-    else if (msg.body.toLowerCase().startsWith('askcs2 ')) {
+    } else if (msg.body.toLowerCase().startsWith('askcs2 ')) {
         console.log('Received a question to ask the knowledgebase.');
         const input = msg.body.slice(7);
         console.log('Input:', input);
@@ -249,7 +289,9 @@ client.on('message', async (msg) => {
             .catch((error) => {
                 console.error('Error:', error);
             });
-    } else if (['quit', 'cukup', 'berhenti', 'stop'].includes(msg.body.toLowerCase())) {
+    } else if (
+        ['quit', 'cukup', 'berhenti', 'stop'].includes(msg.body.toLowerCase())
+    ) {
         // Remove user from conversation map if they want to quit
         userConversations.delete(msg.from);
         msg.reply('Anda telah mengakhiri percakapan dengan bot cs.');
@@ -294,7 +336,10 @@ client.on('message', async (msg) => {
     } else if (msg.body.toLowerCase().startsWith('slogan ')) {
         const userRequirement = msg.body.slice(7);
         chat.sendSeen();
-        const requirement = await translate(userRequirement, {from: 'id', to: 'en',});
+        const requirement = await translate(userRequirement, {
+            from: 'id',
+            to: 'en',
+        });
         // await sendMessageWithDelay(client, chat, msg, 'Harap bersabar menunggu, Vido AI butuh beberapa waktu untuk generate logo Anda 😊');
         generateSlogan(requirement.text)
             .then(async (response) => {

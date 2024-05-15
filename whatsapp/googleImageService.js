@@ -6,6 +6,7 @@ const { format } = require('date-fns');
 const Jimp = require('jimp');
 const axios = require('axios');
 const mime = require('mime-types');
+const { Readable } = require('stream');
 
 // Load the service account key JSON file.
 const serviceAccount = require('../app-spaces-guntar-2024-a9477f694db8.json');
@@ -23,6 +24,45 @@ const drive = google.drive({
     version: 'v3',
     auth: jwtClient,
 });
+
+
+function bufferToStream(buffer) {
+    const stream = new Readable();
+    stream.push(buffer);
+    stream.push(null);
+    return stream;
+}
+
+async function uploadBase64ToGoogleDrive(base64data, fileName) {
+    const parentId = '1NuP83rBhbIgL_EOXQRCnYfV392Vuj_mw'; 
+    const buffer = Buffer.from(base64data, 'base64');
+    const fileStream = bufferToStream(buffer);
+
+    const response = await drive.files.create({
+        requestBody: {
+            name: fileName,
+            parents: [parentId],
+        },
+        media: {
+            mimeType: 'image/jpeg',
+            body: fileStream,
+        },
+    });
+
+    // Make the file public
+    await drive.permissions.create({
+        fileId: response.data.id,
+        requestBody: {
+            role: 'reader',
+            type: 'anyone',
+        },
+    });
+
+    // Construct the direct download link
+    const directLink = `https://drive.google.com/uc?export=download&id=${response.data.id}`;
+
+    return directLink;
+}
 
 async function watermarkImage(imagePath, watermarkPath, outputImagePath) {
     // Load the images
@@ -146,6 +186,6 @@ async function watermarkingImageUploadToGDrive(imageUrl) {
 
 
 module.exports = {
-    uploadImage,
+    uploadBase64ToGoogleDrive,
     watermarkingImageUploadToGDrive,
 };
