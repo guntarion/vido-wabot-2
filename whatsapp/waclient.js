@@ -23,10 +23,12 @@ const {
     generateTestimonial,
     appendToGoogleSheet,
     // describeImageWithBase64,
-    describeImageWithUrl,
+    // describeImageWithUrl,
+    suggestSuitableOccasionOfShirt,
+    suggestDesignFromLogo,
     googleAuth,
 } = require('./openaiService');
-const { watermarkingImageUploadToGDrive, uploadImage } = require('./googleImageService');
+const watermarkingImageUploadToGDrive = require('./googleImageService');
 
 const translate = require('../src/googletranslate/index.js');
 
@@ -114,11 +116,10 @@ client.on('message', async (msg) => {
     }
     */
 
-    else if (msg.body.startsWith('inigimana ')) {
-        const link_gambar = msg.body.slice(10);
-        describeImageWithUrl(link_gambar)
+    else if (msg.body.startsWith('pasuntuk ')) {
+        const link_gambar = msg.body.slice(9);
+        suggestSuitableOccasionOfShirt(link_gambar)
             .then((response) => {
-                // Send the response text back to the user
                 msg.reply(response);
             })
             .catch((error) => {
@@ -128,7 +129,21 @@ client.on('message', async (msg) => {
                     error
                 );
             });
+    }
 
+    else if (msg.body.startsWith('idedesain ')) {
+        const link_gambar = msg.body.slice(10);
+        suggestDesignFromLogo(link_gambar)
+            .then((response) => {
+                msg.reply(response);
+            })
+            .catch((error) => {
+                console.error('OpenAI Error:', error);
+                msg.reply(
+                    'Mohon maaf, terjadi error saat memproses request Anda.',
+                    error
+                );
+            });
     }
 
     else if (msg.body.startsWith('img ')) {

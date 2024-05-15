@@ -63,6 +63,7 @@ async function describeImageWithBase64(imageBase64) {
     }
 }
 
+/*
 async function describeImageWithUrl(imageUrl) {
     try {
         // Create the payload for the API request
@@ -71,7 +72,7 @@ async function describeImageWithUrl(imageUrl) {
             messages: [
                 {
                     role: 'system',
-                    content: 'User will give you a picture of a shirt, or a person using a shirt. Please focus on the shirt, completely ignore the person; describe the shirt and suggest, in what occasion it can be worn.',
+                    content: 'Given a picture of a shirt, analyze the shirt in detail while completely ignoring any person present in the image. Provide a thorough description of the shirt, including its color, pattern, material, style, and any distinctive features such as buttons, collars, cuffs, or embroidery. Based on these characteristics, suggest suitable occasions where the shirt would be appropriately worn. Consider a range of scenarios, from casual to formal events, and specify why the shirt\'s design and style make it ideal for these occasions. Also, consider the versatility of the shirt and if it can be adapted to different settings with various accessories or complementary clothing items. Translate or provide your response in Bahasa Indonesia.',
                 },
                 {
                     role: 'user',
@@ -96,6 +97,89 @@ async function describeImageWithUrl(imageUrl) {
         console.error('Error describing the image:', error);
     }
 }
+*/
+
+async function suggestSuitableOccasionOfShirt(imageUrl) {
+    try {
+        // Create the payload for the API request
+        const payload = {
+            model: 'gpt-4o',
+            messages: [
+                {
+                    role: 'system',
+                    content:
+                        'Given a picture of a shirt, analyze the shirt in detail while completely ignoring any person present in the image. Provide a thorough description of the shirt, including its color, pattern, material, style, and any distinctive features such as buttons, collars, cuffs, or embroidery. Based on these characteristics, suggest suitable occasions where the shirt would be appropriately worn. Consider a range of scenarios, from casual to formal events, and specify why the shirt\'s design and style make it ideal for these occasions. Also, consider the versatility of the shirt and if it can be adapted to different settings with various accessories or complementary clothing items. Translate or provide your response in Bahasa Indonesia.',
+                },
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: imageUrl,
+                            },
+                        },
+                    ],
+                },
+            ],
+            max_tokens: 1000,
+        };
+
+        // Send the request to OpenAI API
+        const response = await openai.chat.completions.create(payload);
+        const responseString = response.choices[0].message.content;
+        // Replace all occurrences of '**' with '*'
+        const modifiedResponse = responseString.replace(/\*\*/g, '*');
+
+        // Log the response from the API
+        // console.log('Description:', response.choices[0].message.content);
+        return modifiedResponse;
+    } catch (error) {
+        console.error('Error describing the image:', error);
+    }
+}
+
+async function suggestDesignFromLogo(imageUrl) {
+    try {
+        // Create the payload for the API request
+        const payload = {
+            model: 'gpt-4o',
+            messages: [
+                {
+                    role: 'system',
+                    content:
+                        'Given the logo provided by the user: 1. Describe the prominent or unique shape of the logo 2. Describe the colors contained within the logo. Identify the primary, secondary, and any accent colors present. Based on those informations, create a design recommendation (in text) for a shirt that: 1) Contains prominent or unique shapes from the logo that can be effectively translated into embroidery or screen printing on the shirt. Prioritize shapes, not letter, that are easily recognizable and carry the essence of the brand’s visual identity. 2)  Incorporates the provided information of colors composition analysis of a logo of the user\'s company. Provide a detailed description of the t-shirt design, including the placement and proportion of each color. This design will help in creating merchandise that aligns closely with the brand\'s visual identity. Translate or provide your response in Bahasa Indonesia. ',
+                },
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: imageUrl,
+                            },
+                        },
+                    ],
+                },
+            ],
+            max_tokens: 1000,
+        };
+
+        // Send the request to OpenAI API
+        const response = await openai.chat.completions.create(payload);
+        const responseString = response.choices[0].message.content;
+        // Replace all occurrences of '**' with '*'
+        const modifiedResponse = responseString.replace(/\*\*/g, '*');
+
+        // Log the response from the API
+        // console.log('Description:', response.choices[0].message.content);
+        return modifiedResponse;
+    } catch (error) {
+        console.error('Error describing the image:', error);
+    }
+}
+
+
 
 async function generateResponseAsCS(prompt) {
     try {
@@ -296,6 +380,8 @@ module.exports = {
     generateTestimonial,
     appendToGoogleSheet,
     describeImageWithBase64,
-    describeImageWithUrl,
+    // describeImageWithUrl,
+    suggestSuitableOccasionOfShirt,
+    suggestDesignFromLogo,
     googleAuth,
 };
