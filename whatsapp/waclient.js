@@ -26,6 +26,8 @@ const {
     suggestDesignFromLogo,
     suggestDesignFromLogoBase64Input,
     suggestSuitableOccasionOfShirtBase64Input,
+    suggestHowToTakeCareOfShirt,
+    suggestHowToTakeCareOfShirtFromLabel,
     googleAuth,
 } = require('./openaiService');
 const { watermarkingImageUploadToGDrive, 
@@ -119,7 +121,7 @@ client.on('message', async (msg) => {
             });
     }
 
-    else if (msg.body.startsWith('pasuntuk ')) {
+    else if (msg.body.toLowerCase().startsWith('pasuntuk ')) {
         const link_gambar = msg.body.slice(9);
         suggestSuitableOccasionOfShirt(link_gambar)
             .then((response) => {
@@ -135,7 +137,7 @@ client.on('message', async (msg) => {
     }
 
     // with base64 (media is in the message)
-    else if (msg.hasMedia && msg.body === 'pasuntuk') {
+    else if (msg.hasMedia && msg.body.toLowerCase() === 'pasuntuk') {
         const media = await msg.downloadMedia();
         const base64data = media.data.toString('base64');
 
@@ -153,7 +155,7 @@ client.on('message', async (msg) => {
     }
 
     // with url
-    else if (msg.body.startsWith('idedesain ')) {
+    else if (msg.body.toLowerCase().startsWith('idedesain ')) {
         const link_gambar = msg.body.slice(10);
         suggestDesignFromLogo(link_gambar)
             .then((response) => {
@@ -169,7 +171,7 @@ client.on('message', async (msg) => {
     }
 
     // with base64 (media is in the message)
-    else if (msg.hasMedia && msg.body === 'idedesain') {
+    else if (msg.hasMedia && msg.body.toLowerCase() === 'idedesain') {
         const media = await msg.downloadMedia();
         const base64data = media.data.toString('base64');
 
@@ -184,7 +186,39 @@ client.on('message', async (msg) => {
                     error
                 );
             });
-    } else if (msg.body.startsWith('img ')) {
+    } else if (msg.hasMedia && msg.body.toLowerCase() === 'cararawat') {
+        const media = await msg.downloadMedia();
+        const base64data = media.data.toString('base64');
+
+        suggestHowToTakeCareOfShirt(base64data)
+            .then((response) => {
+                msg.reply(response);
+            })
+            .catch((error) => {
+                console.error('OpenAI Error:', error);
+                msg.reply(
+                    'Mohon maaf, terjadi error saat memproses request Anda.',
+                    error
+                );
+            });
+    } 
+    else if (msg.hasMedia && msg.body.toLowerCase() === 'labelrawat') {
+        const media = await msg.downloadMedia();
+        const base64data = media.data.toString('base64');
+
+        suggestHowToTakeCareOfShirtFromLabel(base64data)
+            .then((response) => {
+                msg.reply(response);
+            })
+            .catch((error) => {
+                console.error('OpenAI Error:', error);
+                msg.reply(
+                    'Mohon maaf, terjadi error saat memproses request Anda.',
+                    error
+                );
+            });
+    } 
+    else if (msg.body.startsWith('img ')) {
         const link_gambar = msg.body.slice(4);
         watermarkingImageUploadToGDrive(link_gambar)
             .then((response) => {

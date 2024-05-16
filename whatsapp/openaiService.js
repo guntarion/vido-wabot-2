@@ -108,7 +108,7 @@ async function suggestSuitableOccasionOfShirt(imageUrl) {
                 {
                     role: 'system',
                     content:
-                        'Given a picture of a shirt, analyze the shirt in detail while completely ignoring any person present in the image. Provide a thorough description of the shirt, including its color, pattern, material, style, and any distinctive features such as buttons, collars, cuffs, or embroidery. Based on these characteristics, suggest suitable occasions where the shirt would be appropriately worn. Consider a range of scenarios, from casual to formal events, and specify why the shirt\'s design and style make it ideal for these occasions. Also, consider the versatility of the shirt and if it can be adapted to different settings with various accessories or complementary clothing items. Translate or provide your response in Bahasa Indonesia.',
+                        'Given a picture of a shirt, analyze the shirt in detail while completely ignoring any person present in the image. Provide a thorough description of the shirt, including its color, pattern, material, style, and any distinctive features such as buttons, collars, cuffs, or embroidery. Based on these characteristics, suggest suitable occasions where the shirt would be appropriately worn. Consider a range of scenarios, from casual to formal events, and specify why the shirt\'s design and style make it ideal for these occasions. Also, consider the versatility of the shirt and if it can be adapted to different settings with various accessories or complementary clothing items. Lastly, suggest complementary colors that would go well with the shirt, helping the user create a cohesive outfit. Translate or provide your response in Bahasa Indonesia.',
                 },
                 {
                     role: 'user',
@@ -148,7 +148,7 @@ async function suggestSuitableOccasionOfShirtBase64Input(base64Image) {
                 {
                     role: 'system',
                     content:
-                        'Given a picture of a shirt, analyze the shirt in detail while completely ignoring any person present in the image. Provide a thorough description of the shirt, including its color, pattern, material, style, and any distinctive features such as buttons, collars, cuffs, or embroidery. Based on these characteristics, suggest suitable occasions where the shirt would be appropriately worn. Consider a range of scenarios, from casual to formal events, and specify why the shirt\'s design and style make it ideal for these occasions. Also, consider the versatility of the shirt and if it can be adapted to different settings with various accessories or complementary clothing items. Translate or provide your response in Bahasa Indonesia.',
+                        'Given a picture of a shirt, analyze the shirt in detail while completely ignoring any person present in the image. Provide a thorough description of the shirt, including its color, pattern, material, style, and any distinctive features such as buttons, collars, cuffs, or embroidery. Based on these characteristics, suggest suitable occasions where the shirt would be appropriately worn. Consider a range of scenarios, from casual to formal events, and specify why the shirt\'s design and style make it ideal for these occasions. Also, consider the versatility of the shirt and if it can be adapted to different settings with various accessories or complementary clothing items. Lastly, suggest complementary colors that would go well with the shirt, helping the user create a cohesive outfit. Translate or provide your response in Bahasa Indonesia.',
                 },
                 {
                     role: 'user',
@@ -229,7 +229,85 @@ async function suggestDesignFromLogoBase64Input(base64Image) {
                 {
                     role: 'system',
                     content:
-                        'Given the logo provided by the user: 1. Describe the prominent or unique shape of the logo 2. Describe the colors contained within the logo. Identify the primary, secondary, and any accent colors present. Based on those informations, create a design recommendation (in text) for a shirt that: 1) Contains prominent or unique shapes from the logo that can be effectively translated into embroidery or screen printing on the shirt. Prioritize shapes, not letter, that are easily recognizable and carry the essence of the brand’s visual identity. 2)  Incorporates the provided information of colors composition analysis of a logo of the user\'s company. Provide a detailed description of the t-shirt design, including the placement and proportion of each color. This design will help in creating merchandise that aligns closely with the brand\'s visual identity. Translate or provide your response in Bahasa Indonesia. ',
+                        'Given the logo provided by the user: 1. Describe the prominent or unique shape of the logo 2. Describe the colors contained within the logo. Identify the primary, secondary, and any accent colors present. Based on those informations, create a design recommendation (in text) for a shirt that: 1) Contains prominent or unique shapes from the logo that can be effectively translated into embroidery or screen printing on the shirt. Prioritize shapes, not letter, that are easily recognizable and carry the essence of the brand’s visual identity. 2)  Incorporates the provided information of colors composition analysis of a logo of the user\'s company. Provide a detailed description of the t-shirt design, including the placement and proportion of each color. This design will help in creating merchandise that aligns closely with the brand\'s visual identity. Translate or provide your responses in Bahasa Indonesia. ',
+                },
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: `data:image/jpeg;base64,${base64Image}`,
+                            },
+                        },
+                    ],
+                },
+            ],
+            max_tokens: 1000,
+        };
+
+        // Send the request to OpenAI API
+        const response = await openai.chat.completions.create(payload);
+        const responseString = response.choices[0].message.content;
+        // Replace all occurrences of '**' with '*'
+        const modifiedResponse = responseString.replace(/\*\*/g, '*');
+
+        // Log the response from the API
+        // console.log('Description:', response.choices[0].message.content);
+        return modifiedResponse;
+    } catch (error) {
+        console.error('Error describing the image:', error);
+    }
+}
+
+async function suggestHowToTakeCareOfShirt(base64Image) {
+    try {
+        const payload = {
+            model: 'gpt-4o',
+            messages: [
+                {
+                    role: 'system',
+                    content:
+                        'Given a picture of a shirt, analyze the shirt in detail and completely ignore any person present in the image. Provide specific care and maintenance tips that will help ensure the shirt stays in good condition. Identify the material and style of the shirt from the image and suggest appropriate washing instructions, ironing tips, and general fabric care based on these characteristics. These recommendations should help prolong the life and appearance of the shirt. Translate or provide your responses in Bahasa Indonesia. ',
+                },
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: `data:image/jpeg;base64,${base64Image}`,
+                            },
+                        },
+                    ],
+                },
+            ],
+            max_tokens: 1000,
+        };
+
+        // Send the request to OpenAI API
+        const response = await openai.chat.completions.create(payload);
+        const responseString = response.choices[0].message.content;
+        // Replace all occurrences of '**' with '*'
+        const modifiedResponse = responseString.replace(/\*\*/g, '*');
+
+        // Log the response from the API
+        // console.log('Description:', response.choices[0].message.content);
+        return modifiedResponse;
+    } catch (error) {
+        console.error('Error describing the image:', error);
+    }
+}
+
+async function suggestHowToTakeCareOfShirtFromLabel(base64Image) {
+    try {
+        const payload = {
+            model: 'gpt-4o',
+            messages: [
+                {
+                    role: 'system',
+                    content:
+                        'Given an image of symbols on clothing labels, analyze the symbols and ignore any person or unrelated elements in the image. Provide a detailed explanation of each symbol, focusing on their meaning regarding the proper care of the shirt. If the label also includes information about the fabric type, integrate this into your care recommendations to ensure they are specific and tailored to the material of the shirt. Offer comprehensive care instructions based on the symbols to help maintain the shirt\'s condition over time. Translate or provide your responses in Bahasa Indonesia.',
                 },
                 {
                     role: 'user',
@@ -464,5 +542,7 @@ module.exports = {
     suggestDesignFromLogo,
     suggestDesignFromLogoBase64Input,
     suggestSuitableOccasionOfShirtBase64Input,
+    suggestHowToTakeCareOfShirt,
+    suggestHowToTakeCareOfShirtFromLabel,
     googleAuth,
 };
