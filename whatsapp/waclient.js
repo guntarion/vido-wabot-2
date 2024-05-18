@@ -39,9 +39,21 @@ const translate = require('../src/googletranslate/index.js');
 const userConversations = new Map();
 
 
+// const client = new Client({
+//     authStrategy: new LocalAuth(),
+//     puppeteer: { headless: false },
+//     webVersionCache: {
+//         type: 'remote',
+//         remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+//     },
+// });
+
 const client = new Client({
     authStrategy: new LocalAuth(),
-    puppeteer: { headless: false },
+    puppeteer: {
+        headless: true,
+        args: [ '--no-sandbox', '--disable-gpu', ],
+    },
     webVersionCache: {
         type: 'remote',
         remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',

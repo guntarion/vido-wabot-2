@@ -5,8 +5,10 @@ async function extractText(url) {
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
     const text = await page.evaluate(() => document.body.innerText);
+    const cleanedText = text.replace(/(\r?\n){3,}/g, '\n\n');
+
     await browser.close();
-    return text;
+    return cleanedText;
 }
 
 async function fetchSEOInformation(url) {
