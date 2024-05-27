@@ -109,6 +109,63 @@ client.on('message', async (msg) => {
         msg.reply('pong');
     } 
 
+    else if (msg.body.toLowerCase() === 'info') {
+        const replyMessage = `
+    📳 Demo Vido-WA-Bot
+
+\`info\`
+▸ Menampilkan informasi ini.
+
+\`askcs1 (pertanyaan)\`
+▸ Mengajukan pertanyaan ke AI
+
+\`chat (pesan)\`
+▸ Melakukan percakapan dg CS AI. Untuk berhenti, ketikkan \`quit\` atau \`cukup\` atau \`berhenti\` atau \`stop\`
+▸ 
+\`askcs2 (pertanyaan)\`
+▸ Mengajukan pertanyana ke knowledge based Vido
+
+\`slogan (yang ingin dislogankan)\`
+▸ Membuat slogan untuk kaos
+
+\`logobordir (deskripsi/narasi yang ingin dilogokan)\`
+▸ Membuat logo untuk kepentingan bordir sesuai narasi yang diberikan.
+
+\`desainsablon (deskripsi/narasi yang ingin divisualkan)\`
+▸ Membuat desain untuk kepentingan sablon sesuai narasi yang diberikan.
+
+\`harga kaos\`
+▸ Contoh bagaimana model pertanyaan beruntun untuk identifikasi harga kaos
+
+\`feedback\`
+▸ Menangkap umpan balik dengan rekomendasi testimoni sesuai pilihan feedback.
+
+\`size order\`
+▸ Contoh input ukuran baju, data masuk ke google sheet.
+
+\`sizereg (kodePO) (size) (nama)\`
+▸ Contoh input ukuran baju dengan hanya satu baris, data masuk ke google sheet.
+
+\`desain kaos\`
+▸ Membuat mockup visual kaos sesuai pilihan dan deskripsi
+
+\`pasuntuk\` _(dikirim sbg keterangan dari foto baju)_
+▸ Rekomendasi kesesuaian baju untuk apa.
+
+\`idedesain\` _(dikirim sbg keterangan dari gambar logo)_
+▸ Ide desain seragam berdasarkan gambar logo.
+
+\`cararawat\` _(dikirim sbg keterangan dari foto baju)_
+▸ Info cara merawat baju sbgmn tampak di foto.
+
+\`labelrawat\` _(dikirim sbg keterangan dari foto label baju)_
+▸ Keterangan cara merawat baju sbgmn tertera di label.
+
+
+    `;
+        await replyWithDelay(chat, msg, replyMessage);
+    }
+
     // TODO: test out link preview
     else if (msg.body.startsWith('!preview ')) {
         const text = msg.body.slice(9);
